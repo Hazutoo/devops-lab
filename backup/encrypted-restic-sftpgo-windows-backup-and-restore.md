@@ -2,7 +2,7 @@
 
 **Period:** November 2026  
 **Environment:** Ubuntu Server 24.04.5 LTS, Restic 0.16.4, Docker Compose, Windows 11 Pro, SFTPGo Community 2.7.6, OpenSSH client, Windows Firewall, PowerShell  
-**Evidence status:** **VERIFIED** encrypted repository initialization, key-only SFTP operations, 1 MiB smoke restore and subsequent five-service cold archive upload plus isolated archive restore and full-data check. **IMPLEMENTED** backup/maintenance timers. **NOT VERIFIED** real retention pruning, interruption recovery, complete application recovery or offsite resilience.
+**Evidence status:** **VERIFIED** encrypted repository, key-only SFTP operations, file-level smoke restore, five-service cold archive upload with isolated archive restoration and full-data check, and later timer-driven *not-due skip* behavior. **IMPLEMENTED** offline-aware scheduling for an intermittently powered destination. **NOT VERIFIED** overdue transfer after offline/online transition, actual retention pruning, interruption recovery, full application restoration or offsite resilience.
 
 ## Overview
 
@@ -230,6 +230,51 @@ The earlier 1 MiB synthetic-file restore remains the strongest verified Restic r
 
 The destination workstation must be powered on to receive the backups. Both computers remain at the same physical site, so this is off-host redundancy, **not offsite resilience**.
 
+
+## H. Operational follow-up: offline-aware scheduling for an intermittent destination
+
+**Evidence period:** 4–5 November 2026. The backup target is a personal Windows desktop that is powered on irregularly, while the Ubuntu host runs continuously. A fixed once-weekly maintenance slot can repeatedly miss an unavailable destination, and hourly backup eligibility checks can miss a short desktop-on window. The original successful five-service backup and encrypted repository were **retained without reinitialization**.
+
+### Scheduling change
+
+A v3 scheduler was deployed without replacing the established cold-archive, recovery, or retention implementation:
+
+- **Backup eligibility:** every **5 minutes**, with the existing approximately **23-hour minimum interval** between successful backups.
+- **Maintenance eligibility:** every **10 minutes**, with a durable seven-day due interval, rather than depending on a single early-morning weekly slot. Maintenance remains constrained by remote availability and tag-scoped 7 daily / 4 weekly / 6 monthly policy.
+- **Remote unavailable / task not due:** skip before any application shutdown. An offline target is expected in this environment, not proof of a corrupt repository.
+- **Local status:** reports running services, timer activity, latest completed backup and maintenance state. External notifications have not been configured.
+- **Rollback:** pre-existing timer configuration was saved and a rollback manager command was installed; executing the rollback itself has not been validated.
+
+### What the actual logs proved
+
+| Check | Evidence | Status |
+| --- | --- | --- |
+| V3 install preflight | Five running containers, no outstanding recovery marker, existing scripts/units/state checked | VERIFIED from operator output |
+| Existing backup implementation | Kept unchanged; no container stop or repository modification during v3 installer | VERIFIED from installer transcript |
+| Backup/maintenance timers | Both reported active and enabled | VERIFIED configuration |
+| Actual automated service invocation | `systemd` triggered the backup service and maintenance service after v3 installation | VERIFIED runtime |
+| Not-due guard | Backup logged `v3 SKIP backup is not due yet`; maintenance logged `v3 SKIP maintenance is not due yet` | VERIFIED runtime |
+| TCP availability probe | Target SFTP port reachable during the installation/status check | OBSERVED; TCP reachability only |
+| Overdue snapshot when Windows returns online | No due backup performed by the new schedule during the captured interval | PENDING |
+| Offline-to-online detection and recovery | No supervised offline Windows → online backup cycle observed | PENDING |
+| Actual scoped prune, power-loss recovery, full clean-host restore, external alert delivery | Not evidenced | PENDING |
+
+Successful `systemd` unit completion for a **skip** is an expected planner result. It must **not** be described as another successful Restic backup, retention run, or restore test.
+
+### Nonfatal Restic cache warning
+
+The earlier successful systemd-managed Restic upload emitted a warning that neither `XDG_CACHE_HOME` nor `HOME` was defined. The archive snapshot was nevertheless saved and later passed isolated restoration, checksum comparison and repository integrity verification. Setting an explicit service cache directory is a sensible follow-up, but the warning does not by itself indicate backup failure or corrupt data.
+
+### Remaining operational tests
+
+1. Observe an overdue timer tick while the destination is off, with Docker services still running and an accurate skip/error state.
+2. Power on the destination and verify a newly triggered encrypted snapshot, then repeat an isolated retrieval test.
+3. Verify real tag-scoped pruning after the retention interval and confirm unrelated snapshots remain untouched.
+4. Conduct supervised crash/reboot recovery and service-by-service restoration from the retrieved archive.
+5. Consider external alert delivery and a separate offsite copy for site-level risks.
+
+**Status boundary:** verified first five-service archive backup/isolated archive restore (v2), verified v3 timer dispatch and not-due skips; pending Windows-offline/online and actual overdue-work tests.
+
 ## Engineering lessons
 
 1. **Test application-level SFTP operations.** A successful login does not mean repository initialization, rename, attributes or delete work.
@@ -244,7 +289,7 @@ The destination workstation must be powered on to receive the backups. Both comp
 
 ## Next steps
 
-- Observe an actual timer-driven backup, including a supervised test with the Windows destination temporarily unavailable.
+- Verify a new **overdue** timer-driven backup after the destination transitions from offline to online (timer-driven not-due skips are already validated).
 - Perform an isolated service-by-service application restore from the successfully retrieved cold archive.
 - Exercise controlled interruption/reboot recovery, real retention pruning and alert delivery with the destination online/offline.
 - Conduct a clean-host restore rehearsal and verify each application at the functional level.
