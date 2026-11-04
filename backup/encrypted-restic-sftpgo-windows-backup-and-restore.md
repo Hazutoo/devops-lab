@@ -275,6 +275,16 @@ The earlier successful systemd-managed Restic upload emitted a warning that neit
 
 **Status boundary:** verified first five-service archive backup/isolated archive restore (v2), verified v3 timer dispatch and not-due skips; pending Windows-offline/online and actual overdue-work tests.
 
+## I. Retention policy review on the existing repository (5 November 2026)
+
+The operator inspected the installed maintenance script and verified its actual configured command: tag-scoped `restic forget`, `--group-by tags`, a 7-daily / 4-weekly / 6-monthly policy, and `--prune`. **Inspecting a command is not evidence that the scheduled prune has run.**
+
+Two separate, **non-destructive** manual `restic forget --dry-run` checks then compared the installed `--group-by tags` with `--group-by host,tags`, retaining the same tag filter and 7/4/6 policy. Both opened the existing repository and retained its **single eligible production snapshot** for daily, weekly and monthly reasons; neither selected a snapshot for deletion.
+
+The relevant operational insight is that **both grouping options exclude changing staged-archive paths** from snapshot grouping. `host,tags` additionally separates different source hosts, which matters if the same repository is later shared by multiple servers. In the current single-host deployment, the installed `tags` grouping was left unchanged.
+
+**Verified:** active command configuration and successful dry-run with both grouping modes. **Not verified:** actual prune, correctness of deletion across many aged snapshots, unattended maintenance when the target PC becomes available, or functional restore of all applications. No backup/repository mutation or production server configuration change was made for this documentation follow-up.
+
 ## Engineering lessons
 
 1. **Test application-level SFTP operations.** A successful login does not mean repository initialization, rename, attributes or delete work.
