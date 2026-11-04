@@ -104,3 +104,7 @@ A later session on 4 November 2026 successfully deployed an encrypted Restic rep
 The subsequent attempted production-backup installer failed during preflight, so **automated cold backups, scheduled retention and full application recovery remain pending**. The `NOT IMPLEMENTED` findings in the historical verification table above refer to the original manual archive at the time it was created, not to the later, separately tested Restic repository.
 
 See [Encrypted Cross-OS Backups with Restic, Windows SFTPGo and SSH Key Authentication](encrypted-restic-sftpgo-windows-backup-and-restore.md).
+
+## Later encrypted Restic automation validation
+
+A subsequent, separate encrypted Restic workflow successfully uploaded a new five-service cold archive, restored approximately 210 MiB into an isolated directory, verified tar SHA-256 and extracted eleven mandatory sources. Full repository data verification passed for two snapshots and eight packs. The backup and maintenance timers were enabled after the test; real pruning, interruption/reboot recovery, application-level clean-host restore and external alerting remain pending. This **does not** constitute restoration of the earlier manual archive described in this case study. See the [updated Restic/SFTPGo case study](encrypted-restic-sftpgo-windows-backup-and-restore.md).
