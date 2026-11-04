@@ -12,6 +12,14 @@ and infrastructure experiments from my personal homelab.
 - Backup and disaster recovery
 - Home infrastructure and networking
 
+## Case Studies
+
+| Topic | Case study | Evidence |
+| --- | --- | --- |
+| Linux administration | [Ubuntu Server Health Audit — SMART, APM, and system services](linux/ubuntu-server-health-audit.md) | Observations and test results from November 2026 |
+
+These case studies are sanitized, date-scoped engineering notes. They distinguish observed results from illustrative commands and follow-up work.
+
 ## Documentation Approach
 
 Each case study describes:
