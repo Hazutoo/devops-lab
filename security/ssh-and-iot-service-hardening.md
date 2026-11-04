@@ -123,6 +123,6 @@ This does **not** establish that traffic from untrusted subnets or external IPv6
 
 ## Subsequent backup transport security work
 
-Later the same day, the backup destination was moved from a failing native Windows OpenSSH/SFTP backend to SFTPGo. A dedicated non-admin Windows service account, loopback-only administrative UI with TOTP, host-key verification, key-only SFTP and a narrowly scoped inbound firewall rule were validated. A Restic 1 MiB backup/restore passed; scheduled production backups did not.
+Later the same day, the backup destination was moved from a failing native Windows OpenSSH/SFTP backend to SFTPGo. A dedicated non-admin Windows service account, loopback-only administrative UI with TOTP, host-key verification, key-only SFTP and a narrowly scoped inbound firewall rule were validated. An initial Restic 1 MiB backup/restore passed; at that point scheduled production backups were unverified. Later the same day, a corrected installer successfully uploaded and restored an encrypted five-container cold archive, verified its checksum and enabled backup/maintenance timers. Actual scheduled runs, pruning and crash recovery are still pending.
 
 These measures protect a **backup transport and storage service**, not the existing Ubuntu SSH daemon or the smart-home protocols discussed above. See [the encrypted Restic/SFTPGo case study](../backup/encrypted-restic-sftpgo-windows-backup-and-restore.md).
