@@ -20,7 +20,8 @@ The projects emphasize operational troubleshooting, deliberate security changes,
 | Linux and storage | [Ubuntu Server Health Audit: SMART, APM and System Services](linux/ubuntu-server-health-audit.md) | Observed hardware counters, self-tests, boot and services |
 | Networking and Linux | [Recovering Network Readiness, NTP and Boot Time](linux/networkmanager-ntp-boot-recovery.md) | NetworkManager/Netplan remediation; synchronized time after reboot |
 | Backup engineering | [Docker Cold Backup and Verified Off-Host Transfer](backup/docker-cold-backup-integrity-and-transfer.md) | Five-service archive; SHA-256 matched on Ubuntu and Windows; restore remains untested |
-| Security engineering | [Incremental SSH and Smart-Home Security Hardening](security/ssh-and-iot-service-hardening.md) | Key-only SSH verified, frontend authentication added; firewall work not finished |
+| Security engineering | [Incremental SSH and Smart-Home Security Hardening](security/ssh-and-iot-service-hardening.md) | Key-only SSH and frontend authentication; documents the earlier firewall rollback |
+| Network security | [Host and Docker Firewall Hardening with nftables and systemd](security/nftables-host-docker-firewall.md) | Persistent firewall verified after reboot; trusted-LAN TCP and DNS tested; untrusted-source blocking still pending |
 
 ## Technical approach
 

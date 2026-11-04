@@ -114,3 +114,9 @@ The engineering issue is that Docker forwarding rules and host INPUT rules diffe
 7. Add HTTPS or equivalent trusted transport, MQTT ACL review and a carefully tested persistent firewall plan.
 
 **Scope boundary:** This project documents authentication improvements and an honest failed firewall trial; it does not claim a fully hardened server.
+
+## Subsequent follow-up: persistent firewall deployed
+
+The firewall trial described above was **a historical intermediate step**, not the final status of this homelab. Later on 4 November 2026, a dedicated `nftables` `inet` table and systemd unit were deployed. After reboot, five Docker containers were running, eight selected TCP ports remained reachable from the trusted LAN, Pi-hole resolved DNS queries, and boot logs confirmed the firewall finished before Docker started.
+
+This does **not** establish that traffic from untrusted subnets or external IPv6 sources is blocked. Those negative tests remain pending. See the separate case study: [Host and Docker Firewall Hardening with nftables and systemd](nftables-host-docker-firewall.md).
