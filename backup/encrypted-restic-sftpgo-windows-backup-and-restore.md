@@ -251,4 +251,4 @@ The destination workstation must be powered on to receive the backups. Both comp
 - Independently verify all SFTP account restrictions and firewall denies from an untrusted origin.
 - Add a third offsite destination if the recovery objectives require site-loss protection.
 
-**Publication boundary:** this case study contains no private network addressing, SSH key material, secrets, account names, host fingerprints, device serials or privileged backup archives. It documents a real successful encrypted backup transport **and** an unfinished automation attempt.
+**Publication boundary:** this case study contains no private network addressing, SSH key material, secrets, account names, host fingerprints, device serials or privileged backup archives. It documents successful encrypted transport, an initial failed installer, and a later verified full cold archive backup with isolated restoration. Scheduled pruning, crash recovery, external alerting and application-level disaster recovery are not yet proven.
