@@ -120,3 +120,9 @@ The engineering issue is that Docker forwarding rules and host INPUT rules diffe
 The firewall trial described above was **a historical intermediate step**, not the final status of this homelab. Later on 4 November 2026, a dedicated `nftables` `inet` table and systemd unit were deployed. After reboot, five Docker containers were running, eight selected TCP ports remained reachable from the trusted LAN, Pi-hole resolved DNS queries, and boot logs confirmed the firewall finished before Docker started.
 
 This does **not** establish that traffic from untrusted subnets or external IPv6 sources is blocked. Those negative tests remain pending. See the separate case study: [Host and Docker Firewall Hardening with nftables and systemd](nftables-host-docker-firewall.md).
+
+## Subsequent backup transport security work
+
+Later the same day, the backup destination was moved from a failing native Windows OpenSSH/SFTP backend to SFTPGo. A dedicated non-admin Windows service account, loopback-only administrative UI with TOTP, host-key verification, key-only SFTP and a narrowly scoped inbound firewall rule were validated. A Restic 1 MiB backup/restore passed; scheduled production backups did not.
+
+These measures protect a **backup transport and storage service**, not the existing Ubuntu SSH daemon or the smart-home protocols discussed above. See [the encrypted Restic/SFTPGo case study](../backup/encrypted-restic-sftpgo-windows-backup-and-restore.md).

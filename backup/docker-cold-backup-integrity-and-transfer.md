@@ -96,3 +96,11 @@ The source backup was created first on the same HDD. Protection from source-HDD 
 - Monitor backup age and failed jobs.
 
 **Scope boundary:** No disaster recovery exercise, restore benchmark, RTO/RPO claim or scheduled transfer was performed during the documented work.
+
+## Subsequent follow-up: encrypted Restic transport and synthetic-file recovery
+
+A later session on 4 November 2026 successfully deployed an encrypted Restic repository over Windows SFTPGo using a non-admin Windows service identity, key-only SSH and restricted firewall access. A **1 MiB synthetic test file was backed up, restored byte-for-byte and validated with a full-data repository check**. That successful test is **not** a restore of the earlier manual five-service archive, which remains untested.
+
+The subsequent attempted production-backup installer failed during preflight, so **automated cold backups, scheduled retention and full application recovery remain pending**. The `NOT IMPLEMENTED` findings in the historical verification table above refer to the original manual archive at the time it was created, not to the later, separately tested Restic repository.
+
+See [Encrypted Cross-OS Backups with Restic, Windows SFTPGo and SSH Key Authentication](encrypted-restic-sftpgo-windows-backup-and-restore.md).
