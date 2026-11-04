@@ -2,7 +2,7 @@
 
 **Period:** November 2026  
 **Environment:** Ubuntu Server 24.04.5 LTS, Restic 0.16.4, Docker Compose, Windows 11 Pro, SFTPGo Community 2.7.6, OpenSSH client, Windows Firewall, PowerShell  
-**Evidence status:** **VERIFIED** encrypted repository initialization, key-only SFTP file operations, 1 MiB test backup/restore and full-data check. **NOT VERIFIED** automated production backup, retention, complete application recovery or offsite resilience.
+**Evidence status:** **VERIFIED** encrypted repository initialization, key-only SFTP operations, 1 MiB smoke restore and subsequent five-service cold archive upload plus isolated archive restore and full-data check. **IMPLEMENTED** backup/maintenance timers. **NOT VERIFIED** real retention pruning, interruption recovery, complete application recovery or offsite resilience.
 
 ## Overview
 
@@ -16,7 +16,7 @@ The implementation deliberately separates three questions:
 2. Can Restic write encrypted data and actually restore the same bytes?
 3. Can an automated cold backup safely stop, restart and recover all applications even after interruptions?
 
-The first two were demonstrated; the third remained incomplete.
+The first two were demonstrated in the initial phase. A later corrected installer also completed a real five-service cold archive backup and isolated archive restore; crash recovery, application-level rebuild and unattended retention still require independent tests.
 
 ## Architecture and security boundaries
 
@@ -172,7 +172,7 @@ Containers configured with `unless-stopped` are not guaranteed to restart automa
 
 However, the recovery helper script was pasted through a terminal with garbled echo output. Although a `bash -n` check passed and the file existed with root-only permissions, the installed helper's real behavior was **not tested**. A syntactically correct shell script is not a verified disaster-recovery mechanism.
 
-## F. Automation failure and what remained unfinished
+## F. Historical automation failure before successful v2 follow-up
 
 A later all-in-one setup script was intended to validate preconditions, install service/timer units, perform a real Docker cold backup, restore its uploaded archive, check the repository, and only then enable scheduled jobs.
 
@@ -180,7 +180,7 @@ The installer was copied successfully using the operator's custom SSH client ali
 
 The subsequent installer printed only its setup banner and the beginning of the `PRE-FLIGHT` stage, then exited. Inspection of the supplied Bash source found an optional-source discovery loop whose final absent-path test could return status 1 and terminate the script under `set -e` without a useful message. This was a plausible source-level defect, **not independently confirmed with a full execution trace**.
 
-Consequently, the following are **NOT VERIFIED as completed**:
+At the end of that **earlier failed attempt**, the following were **NOT VERIFIED as completed** (later progress is documented in section G):
 
 - Automatic daily Restic backups and their systemd timer.
 - Weekly maintenance timer, 7/4/6 retention execution or `forget --prune`.
@@ -191,6 +191,45 @@ Consequently, the following are **NOT VERIFIED as completed**:
 
 The earlier 1 MiB synthetic-file restore remains the strongest verified Restic result.
 
+
+## G. Follow-up: verified five-service archive backup and isolated restore
+
+**Evidence:** Operator-provided installation transcript from 4 November 2026, after the earlier installer failure documented above. The corrected setup completed successfully. This is a later, distinct validation event; the earlier failure remains part of the engineering history.
+
+### Installation and preflight
+
+- Inspected existing backup scripts and unit files before replacing them; prior versions were preserved for rollback.
+- Checked that all five Docker services were running and their persistent bind mounts matched the expected inventory.
+- Discovered 20 available data/configuration paths; excluded the media library by design.
+- Confirmed more than sufficient temporary disk space and noninteractive reachability of the **existing** encrypted Restic repository. Repository initialization was **not repeated**.
+- Installed dedicated backup, recovery, maintenance, status and alert helper programs and systemd units. Recovery was enabled before the first service stop.
+- The recovery helper passed a limited no-stop marker test; no power-loss/reboot or forced-kill recovery experiment was performed.
+
+### Verified upload and restore evidence
+
+| Test | Observed outcome |
+| --- | --- |
+| Cold archive of five services | Uploaded to encrypted Restic repository |
+| Containers after backup | All five reported running |
+| Repository snapshot | New production snapshot created, distinct from the earlier 1 MiB smoke test |
+| Archive restore | 210.245 MiB restored to an isolated local directory |
+| Integrity | Restored tar SHA-256 check: OK |
+| Archive content | Eleven mandatory sources successfully extracted |
+| Restic repository full-data check | 2/2 snapshots, 8/8 packs, no errors |
+
+**Verified scope:** successful creation/upload of a five-service cold archive, return of the archive from encrypted storage, byte-integrity check and extraction of required content, and application containers running after the backup.
+
+**Not demonstrated:** service-by-service startup using the restored files, recovery on a clean host, complete disaster recovery, an independently measured downtime/RPO/RTO or recovery under crash/power-loss conditions.
+
+### Scheduling, retention and monitoring state
+
+- Hourly backup eligibility/retry timer and weekly maintenance timer were **installed and enabled only after** upload, restore, checksum and repository checks passed.
+- Tagged retention policy of **7 daily / 4 weekly / 6 monthly** passed a **dry-run** while the earlier independent smoke snapshot remained outside its scope.
+- **Not yet verified:** an actual scheduled invocation, real `forget --prune`, unattended retry while the Windows destination is offline, or a failure notification reaching an external channel.
+- Local diagnostics are available via the installed status helper, systemd and journald. External notification delivery was not configured.
+
+The destination workstation must be powered on to receive the backups. Both computers remain at the same physical site, so this is off-host redundancy, **not offsite resilience**.
+
 ## Engineering lessons
 
 1. **Test application-level SFTP operations.** A successful login does not mean repository initialization, rename, attributes or delete work.
@@ -198,16 +237,16 @@ The earlier 1 MiB synthetic-file restore remains the strongest verified Restic r
 3. **Pin verified SSH host keys.** Keep a port-specific identity when replacing an SFTP backend.
 4. **Prove restoration, not just upload.** The smoke-test restore and pack checks made the new repository demonstrably usable.
 5. **Do not conflate test snapshots with production backups.** Restoring a 1 MiB file is not restoring a five-service homelab.
-6. **Be precise about automation state.** An enabled recovery service is not proof of recovery; a script that stops at preflight is not a deployed backup schedule.
+6. **Be precise about automation state.** The initial script failed at preflight; the later verified archive backup and enabled timers still do not prove crash recovery, real retention pruning or app-level disaster recovery.
 7. **Design for offline targets and power loss.** A home Windows workstation may be unavailable at the scheduled time; failures need alerts and a second recovery path.
 8. **Protect staged archives.** Raw tar files may expose service credentials even when the final Restic repository is encrypted.
 9. **Keep a second off-host copy distinct from a true offsite copy.** Two computers in one building do not address theft, fire or other site-wide loss.
 
 ## Next steps
 
-- Fix the preflight return-code bug; test installer error handling and state markers before running against the live services.
-- Perform a full cold backup of five services to Restic, restore the archive and inspect the recovered data in isolation.
-- Verify systemd timers, retention behavior and alerting with the Windows target online and offline.
+- Observe an actual timer-driven backup, including a supervised test with the Windows destination temporarily unavailable.
+- Perform an isolated service-by-service application restore from the successfully retrieved cold archive.
+- Exercise controlled interruption/reboot recovery, real retention pruning and alert delivery with the destination online/offline.
 - Conduct a clean-host restore rehearsal and verify each application at the functional level.
 - Independently verify all SFTP account restrictions and firewall denies from an untrusted origin.
 - Add a third offsite destination if the recovery objectives require site-loss protection.
