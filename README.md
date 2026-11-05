@@ -50,3 +50,7 @@ After the original SFTP smoke test and failed automation preflight, a corrected 
 ## Follow-up: intermittent backup destination and observed timer execution
 
 A later scheduling revision adapted the existing Restic backup to a Windows desktop powered on only occasionally. It preserves the encrypted repository and verified cold-backup workflow while checking backup eligibility every 5 minutes and maintenance eligibility every 10 minutes. **Actual systemd invocations and correct not-due skips were observed**, but a newly overdue upload after Windows returns online, real pruning and crash recovery have **not** been demonstrated. The [existing Restic/SFTPGo case study](backup/encrypted-restic-sftpgo-windows-backup-and-restore.md#h-operational-follow-up-offline-aware-scheduling-for-an-intermittent-destination) contains implementation rationale and verification boundaries.
+
+## Capacity baseline and future platform plan
+
+A read-only host audit on 5 November 2026 confirmed spare memory capacity, unallocated LVM extents and five running Docker services. The existing Wi-Fi and hardware remain in use by choice. A [sanitized baseline and phased roadmap](docs/2026-11-05-capacity-baseline-and-roadmap.md) separates verified observations from planned monitoring, documentation CI/CD, automation, NAS and workstation-based lab work.
