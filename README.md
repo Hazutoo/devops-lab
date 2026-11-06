@@ -1,5 +1,11 @@
 # DevOps Lab
 
+## Operator-controlled terminal workflow
+
+The [PowerShell SSH clipboard workflow](docs/2026-11-06-powershell-ssh-clipboard-workflow.md) describes how a human operator can run remote Linux commands through a local PowerShell helper and paste the captured results into an ordinary chat. It includes a sanitized example, interactive sudo support, multiline here-string guidance, and privacy boundaries. It does **not** give an assistant autonomous terminal access.
+
+
+
 A collection of evidence-based DevOps case studies and infrastructure experiments from a personal Ubuntu homelab.
 
 The projects emphasize operational troubleshooting, deliberate security changes, measurable validation and reproducible engineering decisions. They document **what was actually implemented**, including failures and unresolved work.
