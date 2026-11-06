@@ -307,3 +307,34 @@ The relevant operational insight is that **both grouping options exclude changin
 - Add a third offsite destination if the recovery objectives require site-loss protection.
 
 **Publication boundary:** this case study contains no private network addressing, SSH key material, secrets, account names, host fingerprints, device serials or privileged backup archives. It documents successful encrypted transport, an initial failed installer, and a later verified full cold archive backup with isolated restoration. Scheduled pruning, crash recovery, external alerting and application-level disaster recovery are not yet proven.
+
+
+## J. Follow-up: verified OFF → ON encrypted backup and isolated retrieval (6 November 2026)
+
+**Evidence:** Operator-provided `systemd` journal, Restic output and restore/checksum transcript from 6 November. This **updates** the earlier “PENDING” Windows-offline/online status in sections H/I; those sections accurately describe the state as of 4–5 November.
+
+### End-to-end behavior observed
+
+- Two due timer runs while the Windows destination was offline logged a skip with an explicit statement that Docker services remained running and retry would occur automatically.
+- On the next observed five-minute gate after the destination came online, v3 identified that a backup was due and invoked the existing v2 cold-backup implementation.
+- The five Docker services were stopped and restarted for the backup. Observed cold-backup interruption was approximately **39 seconds**.
+- An encrypted production snapshot was successfully created in the **existing** Restic repository; approximately **219.7 MiB** was processed and **33.9 MiB** stored.
+- Independent `restic snapshots` and `restic ls` operations confirmed the new backup and its archive, manifest and checksum companion.
+- An isolated `restic restore` recovered approximately **219.7 MiB**. The restored archive passed `sha256sum -c`, and archive listing found **409 entries**.
+- All five original services were running after the backup; the recovery marker was absent.
+
+### Verification boundary
+
+| Capability | Status |
+| --- | --- |
+| Offline destination skip without application shutdown | **VERIFIED** |
+| Destination return → due timer → completed encrypted archive upload | **VERIFIED** |
+| Remote snapshot existence and isolated archive integrity | **VERIFIED** |
+| Startup from recovered application data on a clean host | **PENDING** |
+| Forced crash/reboot recovery | **PENDING** |
+| Actual retention-policy prune | **PENDING** |
+| External alerts / offsite disaster resilience | **PENDING** |
+
+An earlier full `restic check --read-data` succeeded, but a new whole-repository data check specifically after this snapshot is **not claimed**. Archive retrieval and SHA-256 do not prove application-level recovery. The backup destination is off-host, not geographically offsite.
+
+**Key design lesson:** for an intermittently powered destination, an eligibility gate that skips safely while offline and retries promptly when reachable can deliver materially better backup coverage than a rigid once-per-day time slot.

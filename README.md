@@ -54,3 +54,9 @@ A later scheduling revision adapted the existing Restic backup to a Windows desk
 ## Capacity baseline and future platform plan
 
 A read-only host audit on 5 November 2026 confirmed spare memory capacity, unallocated LVM extents and five running Docker services. The existing Wi-Fi and hardware remain in use by choice. A [sanitized baseline and phased roadmap](docs/2026-11-05-capacity-baseline-and-roadmap.md) separates verified observations from planned monitoring, documentation CI/CD, automation, NAS and workstation-based lab work.
+
+
+## 6 November 2026: validated reliability fixes
+
+- [Zigbee2MQTT Discovery mismatch and energy-statistics case study](docs/2026-11-06-home-assistant-mqtt-discovery-and-energy-statistics.md) — traced invalid group payload attributes, verified scoped MQTT filtering, preserved historical energy measurements during a guarded Recorder metadata repair, and confirmed resumed five-minute statistics. Hourly follow-up remains open.
+- [Restic/SFTPGo follow-up](backup/encrypted-restic-sftpgo-windows-backup-and-restore.md#j-follow-up-verified-off--on-encrypted-backup-and-isolated-retrieval-6-november-2026) — a real offline-to-online timer retry produced a new encrypted production snapshot and checksum-verified isolated restore. Actual prune, crash recovery, alerts and full clean-host application restoration are not claimed.
