@@ -1,7 +1,7 @@
 # Case Study: Fixing MQTT Light Capability Mismatches and Home Assistant Energy Statistics
 
 **Date:** 6 November 2026  
-**Status:** Two MQTT group fixes and short-term Recorder recovery VERIFIED; hourly statistics follow-up PENDING.
+**Status:** Two MQTT group fixes and short-term Recorder recovery VERIFIED; a later 7 November audit also VERIFIED resumed hourly statistics. Broader historical continuity remains PENDING.
 
 ## Overview
 
