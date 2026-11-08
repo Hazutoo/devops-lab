@@ -2,7 +2,7 @@
 
 **Period:** November 2026  
 **Environment:** Ubuntu Server 24.04.5 LTS, Restic 0.16.4, Docker Compose, Windows 11 Pro, SFTPGo Community 2.7.6, OpenSSH client, Windows Firewall, PowerShell  
-**Evidence status:** **VERIFIED** encrypted repository, key-only SFTP operations, file-level smoke restore, five-service cold archive upload with isolated archive restoration and full-data check, and later timer-driven *not-due skip* behavior. **IMPLEMENTED** offline-aware scheduling for an intermittently powered destination. **NOT VERIFIED** overdue transfer after offline/online transition, actual retention pruning, interruption recovery, full application restoration or offsite resilience.
+**Evidence status:** **VERIFIED** encrypted repository, key-only SFTP operations, file-level smoke restore, five-service cold archive upload with isolated archive restoration and full-data check, and later timer-driven *not-due skip* behavior. **IMPLEMENTED** offline-aware scheduling for an intermittently powered destination. **LATER VERIFIED (8 Nov)** timer-driven encrypted snapshot after the Windows destination returned online. **NOT VERIFIED** actual retention pruning, interruption recovery, full application restoration or offsite resilience. See section K for later evidence.
 
 ## Overview
 
