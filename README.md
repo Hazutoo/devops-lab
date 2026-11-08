@@ -65,3 +65,8 @@ A read-only host audit on 5 November 2026 confirmed spare memory capacity, unall
 
 - [Zigbee2MQTT Discovery mismatch and energy-statistics case study](docs/2026-11-06-home-assistant-mqtt-discovery-and-energy-statistics.md) — traced invalid group payload attributes, verified scoped MQTT filtering, preserved historical energy measurements during a guarded Recorder metadata repair, and confirmed resumed five-minute statistics. Hourly follow-up remains open.
 - [Restic/SFTPGo follow-up](backup/encrypted-restic-sftpgo-windows-backup-and-restore.md#j-follow-up-verified-off--on-encrypted-backup-and-isolated-retrieval-6-november-2026) — a real offline-to-online timer retry produced a new encrypted production snapshot and checksum-verified isolated restore. Actual prune, crash recovery, alerts and full clean-host application restoration are not claimed.
+
+## 8 November 2026: MQTT action deduplication and bounded container logs
+
+- [Case study: duplicate Zigbee2MQTT switch events and Docker JSON log rotation](docs/2026-11-08-zigbee2mqtt-duplicate-events-and-docker-log-rotation.md) — traced paired JSON and action-topic messages, removed redundant Home Assistant triggers, verified two switch actions, and scoped 10 MiB × 3 Docker log rotation to Zigbee2MQTT. Post-change warning recurrence and actual log rollover remain pending.
+- [Restic/SFTPGo follow-up](backup/encrypted-restic-sftpgo-windows-backup-and-restore.md#k-8-november-follow-up-verified-offline-to-online-backup) — verified a new timer-driven encrypted snapshot after the intermittently powered Windows destination returned online. Actual prune and clean-host recovery remain pending.

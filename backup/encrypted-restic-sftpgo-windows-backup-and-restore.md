@@ -2,7 +2,7 @@
 
 **Period:** November 2026  
 **Environment:** Ubuntu Server 24.04.5 LTS, Restic 0.16.4, Docker Compose, Windows 11 Pro, SFTPGo Community 2.7.6, OpenSSH client, Windows Firewall, PowerShell  
-**Evidence status:** **VERIFIED** encrypted repository, key-only SFTP operations, file-level smoke restore, five-service cold archive upload with isolated archive restoration and full-data check, and later timer-driven *not-due skip* behavior. **IMPLEMENTED** offline-aware scheduling for an intermittently powered destination. **NOT VERIFIED** overdue transfer after offline/online transition, actual retention pruning, interruption recovery, full application restoration or offsite resilience.
+**Evidence status:** **VERIFIED** encrypted repository, key-only SFTP operations, file-level smoke restore, five-service cold archive upload with isolated archive restoration and full-data check, and later timer-driven *not-due skip* behavior. **IMPLEMENTED** offline-aware scheduling for an intermittently powered destination. **LATER VERIFIED (8 Nov)** timer-driven encrypted snapshot after the Windows destination returned online. **NOT VERIFIED** actual retention pruning, interruption recovery, full application restoration or offsite resilience. See section K for later evidence.
 
 ## Overview
 
@@ -338,3 +338,13 @@ The relevant operational insight is that **both grouping options exclude changin
 An earlier full `restic check --read-data` succeeded, but a new whole-repository data check specifically after this snapshot is **not claimed**. Archive retrieval and SHA-256 do not prove application-level recovery. The backup destination is off-host, not geographically offsite.
 
 **Key design lesson:** for an intermittently powered destination, an eligibility gate that skips safely while offline and retries promptly when reachable can deliver materially better backup coverage than a rigid once-per-day time slot.
+
+## K. 8 November follow-up: verified offline-to-online backup
+
+**Evidence date:** 8 November 2026. This is a later verification checkpoint; older sections retain their historical limitations as of the time they were written.
+
+A read-only operational audit reported the Windows SFTP listener **offline at 19:15:26 UTC**, back online **at 19:20:04 UTC**, and a newly created encrypted Restic backup at **19:21 UTC**. The backup and maintenance systemd timers were enabled and active; there was no outstanding Docker recovery marker. Later scheduled backup gate executions correctly skipped because a new backup was not yet due.
+
+**VERIFIED:** In this observed window, the intermittently powered backup destination recovered and a fresh encrypted backup was recorded by the automation. This supersedes the older sections' "offline-to-online overdue upload unverified" statement for the **8 November observation**. A successful snapshot is not proof of a full isolated restoration of that particular snapshot or a disaster-recovery rehearsal.
+
+**PENDING:** The first actual scheduled maintenance `prune/check`, longer-running retention behavior, interrupted-operation recovery, external alerting and complete application recovery on a fresh host. Do not weaken these verification boundaries.
