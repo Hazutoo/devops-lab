@@ -113,3 +113,7 @@ Earlier TP-Link/Kasa polling timeouts were not reproduced in the reviewed 24-hou
 6. **Separate verified outcomes from pending work.** Short-term statistics success does not automatically prove the next hourly rollup or full disaster recovery.
 
 See the separate [encrypted backup and restore case study](../backup/encrypted-restic-sftpgo-windows-backup-and-restore.md) for the host's operational backup evidence.
+
+## Later hourly-statistics checkpoint (7 November 2026)
+
+The operator's later read-only Recorder audit observed that **hourly and five-minute statistics continued advancing** after the guarded two-sensor metadata repair. This closes the immediate "no hourly aggregate yet observed" limitation stated in the original 6 November troubleshooting window. It does **not** constitute a complete audit of historical dashboard continuity, rolling daily sensor semantics or all future aggregates.
