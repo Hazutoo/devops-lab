@@ -29,7 +29,7 @@ The pre-fix HA log sample included **31, 16 and 6** `Already running` warnings f
 - Validated the complete Home Assistant configuration and restarted **Home Assistant only**.
 - Confirmed HTTP 200 after restart.
 
-**Physical verification after change:** Double-click in two rooms still performed the intended lamp actions. The third switch's post-change gesture was **not** independently tested; later passive state history suggested functioning manual hold but is not a substitute for the full physical acceptance cycle.
+**Physical verification after change:** Double-click in two rooms still performed the intended lamp actions. The third switch's double/manual-hold behavior was **later tested by the operator**: the light remained ON approximately **10m32s** with manual hold active, followed by helper OFF and lamp OFF. Normal five-minute ON/OFF cycles had been recorded earlier, before MQTT deduplication. The audit alone does not isolate a post-deduplication normal auto-off.
 
 **Still pending:** Verify whether any **new** `Already running` warnings occur after the patch. Historical log entries remain and must not be treated as new incidents.
 
@@ -80,3 +80,9 @@ Home Assistant Recorder had recorded light entities without brightness or color-
 6. **Keep private operational details out of public portfolio documentation.**
 
 For related MQTT Discovery problems and Recorder metadata repairs, see the [earlier Home Assistant case study](2026-11-06-home-assistant-mqtt-discovery-and-energy-statistics.md). For encrypted off-host backup evidence, see the [Restic/SFTPGo case study](../backup/encrypted-restic-sftpgo-windows-backup-and-restore.md).
+
+## Later core manual-hold acceptance check (8–9 November 2026)
+
+The operator reported completing physical switch tests. A read-only Home Assistant state timeline showed the manual-hold helper and light going ON together, the light remaining ON for approximately **10 minutes 32 seconds**, then helper OFF followed immediately by light OFF. Earlier normal ON/OFF sequences were almost exactly **five minutes**, matching the configured timeout. The specific later manual-hold cycle occurred after duplicate MQTT subscriptions were removed.
+
+**Limitations:** The earlier five-minute cycles occurred before that cleanup; this audit did not isolate a new ordinary five-minute auto-off afterward, and it did not uniquely attribute each event to a button. An after-fix fresh-warning assessment is still pending because the four-hour `Already running` count included the period **before** deduplication. These are explicit verification boundaries, not new known faults.
