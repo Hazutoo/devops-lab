@@ -99,3 +99,25 @@ A first attempt to load the extensionless Python executable with `spec_from_file
 - Keep **IMPLEMENTED**, **VERIFIED** and **PENDING** evidence boundaries distinct; simulated success is not production disaster-recovery evidence.
 
 Related work: [encrypted Restic backups](../backup/encrypted-restic-sftpgo-windows-backup-and-restore.md) and [home-automation MQTT incident analysis](2026-11-08-zigbee2mqtt-duplicate-events-and-docker-log-rotation.md).
+
+## 9 November 2026 follow-up: guarded monitor hardening
+
+A second, operator-controlled maintenance stage hardened the existing Python monitor without installing new services or changing application containers, the notification gateway, backup automation or systemd scheduling.
+
+### Findings
+
+A source-level preflight found three resilience gaps: direct concurrent monitor invocations lacked an explicit interprocess lock; malformed JSON caused the state loader to raise an unhandled exception; and the SMART overall-health check did not inspect its command exit code. These findings were reproduced or detected in read-only/isolated tests, not observed as production incidents.
+
+### Implementation and test evidence
+
+The revised monitor uses a nonblocking file lock for normal state-mutating runs, maintains a last-known-good JSON checkpoint and quarantines corrupt primary JSON before attempting recovery. If the checkpoint is also invalid, it fails closed instead of discarding stored incident and notification state. The SMART result now requires a successful command exit and an explicitly recognized healthy status. The original atomic state-write logic and existing alert deduplication/retry semantics were preserved.
+
+The installer validated baseline state and expected source structure, backed up the executable and state, generated a separately guarded rollback, ran **12 isolated assertions**, and only then replaced the executable atomically. All 12 tests passed, covering checkpoint persistence, malformed-state recovery, pending-event preservation, fail-closed behavior, concurrency lock behavior and positive/negative SMART responses.
+
+A subsequent **automatic** systemd timer invocation completed successfully: **18 checks, zero current issues and zero queued notifications**. Both live and checkpoint JSON states parsed, matched and remained restricted to the privileged service account. The timer was active/enabled; no service restart or additional mobile push was needed for this validation.
+
+The operator also confirmed receiving both explicitly generated test notification types (alert and recovery) on the selected phone. This independently validates the intended mobile push path, but not automatic delivery during a real container outage.
+
+**Evidence boundaries:** hardening tests, deployment and one post-update automatic run are VERIFIED. The new rollback was installed and syntax-checked but **not exercised**. Real workload failure/recovery, actual queue replay through Home Assistant downtime, total-host failure detection and clean-host disaster recovery remain PENDING. A last-good checkpoint can lag the latest state; it is not an exactly-once delivery guarantee.
+
+No private backup locations, executable hashes, webhook identifiers, internal addresses, device identifiers or proprietary configuration are included in this public report.
