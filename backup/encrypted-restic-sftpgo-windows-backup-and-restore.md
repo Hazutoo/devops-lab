@@ -353,7 +353,7 @@ A read-only operational audit reported the Windows SFTP listener **offline at 19
 
 A later operator-executed audit enumerated **five snapshots** in the existing encrypted repository: **four production archive snapshots** and **one independent test snapshot**. No backup or maintenance systemd service was running during the read-only check.
 
-The configured tag-scoped retention policy (7 daily, 4 weekly and 6 monthly, grouped by tags) was executed with **\`forget --dry-run\`**. It completed successfully and reported **\`keep 4 snapshots\`**. The test snapshot remained outside the selected production tag. This extends the earlier single-production-snapshot dry-run evidence to four real production snapshots, but still does not prove future pruning of aged snapshots.
+The configured tag-scoped retention policy (7 daily, 4 weekly and 6 monthly, grouped by tags) was executed with **`forget --dry-run`**. It completed successfully and reported **`keep 4 snapshots`**. The test snapshot remained outside the selected production tag. This extends the earlier single-production-snapshot dry-run evidence to four real production snapshots, but still does not prove future pruning of aged snapshots.
 
 Static source inspection confirmed that the installed maintenance script contains retention, pruning, full-data checking and lock-handling logic. Actual maintenance logs still reported that the task was not due. The first eligibility window was estimated for roughly one week after the initial scheduler anchor.
 
