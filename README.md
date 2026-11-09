@@ -70,3 +70,8 @@ A read-only host audit on 5 November 2026 confirmed spare memory capacity, unall
 
 - [Case study: duplicate Zigbee2MQTT switch events and Docker JSON log rotation](docs/2026-11-08-zigbee2mqtt-duplicate-events-and-docker-log-rotation.md) — traced paired JSON and action-topic messages, removed redundant Home Assistant triggers, verified two switch actions, and scoped 10 MiB × 3 Docker log rotation to Zigbee2MQTT. Post-change warning recurrence and actual log rollover remain pending.
 - [Restic/SFTPGo follow-up](backup/encrypted-restic-sftpgo-windows-backup-and-restore.md#k-8-november-follow-up-verified-offline-to-online-backup) — verified a new timer-driven encrypted snapshot after the intermittently powered Windows destination returned online. Actual prune and clean-host recovery remain pending.
+
+
+## 9 November 2026: lightweight monitoring and Companion App alerts
+
+- [Case study: five-minute systemd health monitoring and Home Assistant mobile notifications](docs/2026-11-09-systemd-health-monitor-and-mobile-alerting.md) — deployed 18 host, application, backup-freshness and SMART checks with incident deduplication, a persistent retry queue and a local-only webhook. Healthy production timer runs, a separate mobile push test and isolated incident/queue/recovery tests passed. Real-failure delivery, rollback execution and independent host-down detection remain unverified.
