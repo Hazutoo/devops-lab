@@ -348,3 +348,13 @@ A read-only operational audit reported the Windows SFTP listener **offline at 19
 **VERIFIED:** In this observed window, the intermittently powered backup destination recovered and a fresh encrypted backup was recorded by the automation. This supersedes the older sections' "offline-to-online overdue upload unverified" statement for the **8 November observation**. A successful snapshot is not proof of a full isolated restoration of that particular snapshot or a disaster-recovery rehearsal.
 
 **PENDING:** The first actual scheduled maintenance `prune/check`, longer-running retention behavior, interrupted-operation recovery, external alerting and complete application recovery on a fresh host. Do not weaken these verification boundaries.
+
+## 9 November 2026: expanded production retention dry-run
+
+A later operator-executed audit enumerated **five snapshots** in the existing encrypted repository: **four production archive snapshots** and **one independent test snapshot**. No backup or maintenance systemd service was running during the read-only check.
+
+The configured tag-scoped retention policy (7 daily, 4 weekly and 6 monthly, grouped by tags) was executed with **`forget --dry-run`**. It completed successfully and reported **`keep 4 snapshots`**. The test snapshot remained outside the selected production tag. This extends the earlier single-production-snapshot dry-run evidence to four real production snapshots, but still does not prove future pruning of aged snapshots.
+
+Static source inspection confirmed that the installed maintenance script contains retention, pruning, full-data checking and lock-handling logic. Actual maintenance logs still reported that the task was not due. The first eligibility window was estimated for roughly one week after the initial scheduler anchor.
+
+**VERIFIED:** snapshot inventory, configured policy dry-run and safe not-due skipping. **PENDING:** an actual timer-driven prune/check, post-prune integrity evidence, multi-week retention behavior and full application-level disaster recovery. No repository objects were intentionally removed in this audit.
