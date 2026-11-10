@@ -48,9 +48,9 @@ The published material omits internal and external infrastructure addresses, spe
 
 Maintained as a technical portfolio. New case studies are added as separate, reviewable pull requests. Changes are not automatically merged.
 
-## Later November 2026 backup validation
+## Early November 2026 backup validation (historical checkpoint)
 
-After the original SFTP smoke test and failed automation preflight, a corrected setup successfully uploaded a five-service cold archive, restored and checksum-verified its payload, extracted mandatory sources and passed a full Restic data check. Backup/maintenance timers are enabled; actual timer-driven runs, pruning, interrupted-host recovery and application-level disaster recovery remain pending. Details are maintained in the existing [Restic/SFTPGo case study](backup/encrypted-restic-sftpgo-windows-backup-and-restore.md).
+At the **4 November** checkpoint, after the original SFTP smoke test and failed automation preflight, a corrected setup uploaded a five-service cold archive, checksum-verified its restored payload, extracted mandatory sources and passed a full Restic data check. **At that date**, actual timer-driven runs, pruning, interrupted-host recovery and application-level disaster recovery had not yet been verified. Subsequent dated sections below document the successful offline-to-online backup and **10 November limited clean-VM application recovery**. Actual pruning, interrupted-operation recovery and complete production failover remain unverified. Details are in the [Restic/SFTPGo case study](backup/encrypted-restic-sftpgo-windows-backup-and-restore.md).
 
 ## Follow-up: intermittent backup destination and observed timer execution
 
