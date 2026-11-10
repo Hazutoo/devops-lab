@@ -25,7 +25,7 @@ The projects emphasize operational troubleshooting, deliberate security changes,
 | Linux and storage | [Ubuntu Server Health Audit: SMART, APM and System Services](linux/ubuntu-server-health-audit.md) | Observed hardware counters, self-tests, boot and services |
 | Networking and Linux | [Recovering Network Readiness, NTP and Boot Time](linux/networkmanager-ntp-boot-recovery.md) | NetworkManager/Netplan remediation; synchronized time after reboot |
 | Backup engineering | [Docker Cold Backup and Verified Off-Host Transfer](backup/docker-cold-backup-integrity-and-transfer.md) | Earlier five-service cold archive; SHA-256 matched on Ubuntu and Windows; original archive not restored |
-| Encrypted backup and recovery | [Restic over hardened Windows SFTPGo](backup/encrypted-restic-sftpgo-windows-backup-and-restore.md) | Verified five-service archive restore and systemd timer dispatch; offline-aware scheduling installed, actual prune/recovery pending |
+| Encrypted backup and recovery | [Restic over hardened Windows SFTPGo](backup/encrypted-restic-sftpgo-windows-backup-and-restore.md) | Verified encrypted multi-service backup, isolated clean-VM recovery and limited service protocol tests; full failover and actual retention prune pending |
 | Security engineering | [Incremental SSH and Smart-Home Security Hardening](security/ssh-and-iot-service-hardening.md) | Key-only SSH and frontend authentication; documents the earlier firewall rollback |
 | Network security | [Host and Docker Firewall Hardening with nftables and systemd](security/nftables-host-docker-firewall.md) | Persistent firewall verified after reboot; trusted-LAN TCP and DNS tested; untrusted-source blocking still pending |
 
@@ -79,3 +79,8 @@ A read-only host audit on 5 November 2026 confirmed spare memory capacity, unall
 ## 10 November 2026: SMART false-positive fix and external host heartbeat
 
 - [Updated monitoring case study: SMART bitmask recovery and independent Healthchecks.io heartbeat](docs/2026-11-09-systemd-health-monitor-and-mobile-alerting.md#10-november-2026-follow-up-smart-false-positive-remediation-and-off-host-heartbeat) — 15/15 isolated SMART policy tests passed; the real incident automatically cleared after hourly cache refresh. A systemd HTTPS heartbeat now reaches a hosted checker every five minutes, with email notifications configured. Controlled total-host outage and DOWN-email delivery remain untested.
+
+
+## 10 November 2026: isolated disaster-recovery rehearsal
+
+- [Cross-platform Restic clean-VM recovery (case study, section L)](backup/encrypted-restic-sftpgo-windows-backup-and-restore.md#l-10-november-2026-isolated-clean-vm-disaster-recovery-rehearsal) — recovered the real encrypted five-service archive onto an independently installed, offline-isolated Ubuntu VM, checked archive integrity on both machines, imported exact production images and validated restored application startup. Local DNS resolution and authenticated MQTT publish/subscribe passed; HA-to-broker TCP connectivity and guest reboot persistence were confirmed. **Not demonstrated:** Zigbee radio, full HA MQTT/automation behavior, media-library restoration, production failover, measured RTO/RPO or actual prune. This public case study omits all private infrastructure identifiers.
