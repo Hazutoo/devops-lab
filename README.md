@@ -75,3 +75,7 @@ A read-only host audit on 5 November 2026 confirmed spare memory capacity, unall
 ## 9 November 2026: lightweight monitoring and Companion App alerts
 
 - [Case study: five-minute systemd health monitoring and Home Assistant mobile notifications](docs/2026-11-09-systemd-health-monitor-and-mobile-alerting.md) — deployed 18 host, application, backup-freshness and SMART checks with incident deduplication, a persistent retry queue and a local-only webhook. Healthy production timer runs, a separate mobile push test and isolated incident/queue/recovery tests passed. Real-failure delivery, rollback execution and independent host-down detection remain unverified.
+
+## 10 November 2026: SMART false-positive fix and external host heartbeat
+
+- [Updated monitoring case study: SMART bitmask recovery and independent Healthchecks.io heartbeat](docs/2026-11-09-systemd-health-monitor-and-mobile-alerting.md#10-november-2026-follow-up-smart-false-positive-remediation-and-off-host-heartbeat) — 15/15 isolated SMART policy tests passed; the real incident automatically cleared after hourly cache refresh. A systemd HTTPS heartbeat now reaches a hosted checker every five minutes, with email notifications configured. Controlled total-host outage and DOWN-email delivery remain untested.

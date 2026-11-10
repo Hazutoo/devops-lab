@@ -121,3 +121,33 @@ The operator also confirmed receiving both explicitly generated test notificatio
 **Evidence boundaries:** hardening tests, deployment and one post-update automatic run are VERIFIED. The new rollback was installed and syntax-checked but **not exercised**. Real workload failure/recovery, actual queue replay through Home Assistant downtime, total-host failure detection and clean-host disaster recovery remain PENDING. A last-good checkpoint can lag the latest state; it is not an exactly-once delivery guarantee.
 
 No private backup locations, executable hashes, webhook identifiers, internal addresses, device identifiers or proprietary configuration are included in this public report.
+
+## 10 November 2026 follow-up: SMART false-positive remediation and off-host heartbeat
+
+**Outcome:** the production SMART incident automatically recovered after a scoped code fix, and a hosted external heartbeat was deployed and observed working. A controlled complete host outage was **not** performed.
+
+### SMART threshold-history incident
+
+The monitor initially raised a genuine alert because the SMART command exited with bit 5 set (historical threshold crossing), although the disk explicitly reported `PASSED`. The historical warning was attached to a temperature-related attribute; current temperature was normal for the observed session. Reallocated, pending and offline-uncorrectable sector counts were all zero; no corresponding SMART error-log or inspected kernel storage error was found. This was a **monitor classification error**, not proof of a current physical disk failure. It does not guarantee future HDD reliability.
+
+The revised SMART policy accepts return code `32` **only when** the expected positive health status and zero critical sector counters are present. Other error bits, command failures, negative health text and nonzero/missing critical counters still fail the check.
+
+**Validation:** 15/15 isolated policy scenarios passed, including historical warnings, actual error bits, command timeouts, missing attributes and critical sector counters. The production executable was guarded by a pinned baseline hash, backed up, syntax-checked and atomically replaced. The local monitor timer stayed enabled and active. Because the SMART sample is cached for up to one hour, the old incident did not clear immediately; after a normal refresh, the operator observed **zero active incidents**, **zero pending notifications**, and **seven consecutive healthy monitoring observations** without manually editing incident state. Rollback was prepared but not exercised.
+
+### Independent heartbeat with Healthchecks.io
+
+The local monitoring process and its mobile-notification gateway cannot reliably report a total host outage. To cover that failure mode, a lightweight **systemd oneshot + timer** now sends an outbound HTTPS POST heartbeat to a hosted check, roughly every five minutes. The external check uses a five-minute period plus a ten-minute grace interval and an email channel. No inbound router port or additional monitoring container was required.
+
+The private endpoint URL is stored in a root-protected file and passed to the short-lived sender through systemd credentials, rather than embedded in repository content or command-line arguments.
+
+**Observed:** the systemd timer was active/enabled, two consecutive sender invocations completed successfully, the hosted dashboard showed incoming POST events and `UP`, and an earlier recovery-to-UP email was observed. The previous DOWN interval came from the setup period, not a deliberately induced real host failure.
+
+**Still pending:** controlled DOWN-email validation, actual full-host/power/network outage detection, post-reboot behavior, and rollback execution. This heartbeat detects loss of a signal; it does not identify whether the host, Internet connection or third-party provider caused it.
+
+### Lessons
+
+- Interpret `smartctl` exit status as a **bitmask**, not a simple success/failure Boolean; correlate it with explicit health text and relevant counters.
+- Preserve persistent incident state and wait for normal cache refresh instead of suppressing an alert by deleting state.
+- Keep **isolated policy tests** separate from evidence of production incident recovery.
+- Combine local service checks with an **off-host dead-man's switch**; do not confuse a working heartbeat with a completed disaster-recovery test.
+- Store per-instance endpoints as protected credentials and never publish real ping URLs, private host identifiers or notification tokens.
