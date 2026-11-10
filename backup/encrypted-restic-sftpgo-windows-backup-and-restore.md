@@ -297,7 +297,9 @@ The relevant operational insight is that **both grouping options exclude changin
 8. **Protect staged archives.** Raw tar files may expose service credentials even when the final Restic repository is encrypted.
 9. **Keep a second off-host copy distinct from a true offsite copy.** Two computers in one building do not address theft, fire or other site-wide loss.
 
-## Next steps
+## Next steps (historical list, before the 6–10 November follow-ups)
+
+The checklist below reflects the earlier backup-engineering stage. Some items were **partly or fully completed in later dated sections J–L**: the offline-to-online timer backup and isolated clean-VM recovery with limited application tests. It is retained for traceability, **not** as a current all-pending status list. Actual pruning, full production failover and measured RTO/RPO remain outstanding.
 
 - Verify a new **overdue** timer-driven backup after the destination transitions from offline to online (timer-driven not-due skips are already validated).
 - Perform an isolated service-by-service application restore from the successfully retrieved cold archive.
