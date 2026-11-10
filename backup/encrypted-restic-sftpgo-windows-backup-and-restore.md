@@ -2,7 +2,7 @@
 
 **Period:** November 2026  
 **Environment:** Ubuntu Server 24.04.5 LTS, Restic 0.16.4, Docker Compose, Windows 11 Pro, SFTPGo Community 2.7.6, OpenSSH client, Windows Firewall, PowerShell  
-**Evidence status:** **VERIFIED** encrypted repository, key-only SFTP operations, file-level smoke restore, five-service cold archive upload with isolated archive restoration and full-data check, and later timer-driven *not-due skip* behavior. **IMPLEMENTED** offline-aware scheduling for an intermittently powered destination. **LATER VERIFIED (8 Nov)** timer-driven encrypted snapshot after the Windows destination returned online. **NOT VERIFIED** actual retention pruning, interruption recovery, full application restoration or offsite resilience. See section K for later evidence.
+**Evidence status:** **VERIFIED** encrypted repository, key-only SFTP operations, five-service cold backup/isolated archive restore, timer-driven offline-to-online catch-up, and **10 November isolated clean-VM recovery with four application smoke tests and guest reboot persistence**. **PARTIAL** HA/MQTT integration coverage; Zigbee hardware and production failover not tested. **NOT VERIFIED** actual retention pruning, interruption recovery, full end-to-end production-equivalent application restoration or offsite resilience. See sections J–L for dated follow-ups.
 
 ## Overview
 
@@ -358,3 +358,69 @@ The configured tag-scoped retention policy (7 daily, 4 weekly and 6 monthly, gro
 Static source inspection confirmed that the installed maintenance script contains retention, pruning, full-data checking and lock-handling logic. Actual maintenance logs still reported that the task was not due. The first eligibility window was estimated for roughly one week after the initial scheduler anchor.
 
 **VERIFIED:** snapshot inventory, configured policy dry-run and safe not-due skipping. **PENDING:** an actual timer-driven prune/check, post-prune integrity evidence, multi-week retention behavior and full application-level disaster recovery. No repository objects were intentionally removed in this audit.
+
+
+## L. 10 November 2026: isolated clean-VM disaster recovery rehearsal
+
+**Evidence:** Operator-executed PowerShell, Restic, Hyper-V, Ubuntu and Docker command output. This section updates the *historical* "clean-host recovery pending" statements in earlier sections for the **limited scope actually tested**. The original production server and encrypted repository were not modified during the recovery rehearsal.
+
+### Recovery architecture
+
+A separate Generation 2 Ubuntu Server **24.04 LTS** VM was installed using Hyper-V on the Windows backup workstation. The guest was placed on a **dedicated internal-only virtual switch** with a static address and **no default route**. Administration used a dedicated SSH key from PowerShell.
+
+Docker Engine and Compose were brought into the VM as offline binaries, with Docker bridge networking, IP forwarding and daemon-managed firewall rules disabled. All standalone application tests used **network none** with **no published host ports**. No restored Compose file was started unchanged, because the real Home Assistant and DNS service definitions use host networking and a Zigbee service references a physical coordinator.
+
+A Hyper-V **Standard checkpoint** was created for rollback because a production checkpoint was unavailable. It was not treated as an independent backup.
+
+### Verified recovery chain
+
+| Step | Operator-observed result |
+| --- | --- |
+| Read encrypted Restic repository from the Windows host | **PASS**: existing snapshot and checksum companion found |
+| Restore the actual five-service archive | **PASS**: SHA-256 matched the companion checksum on Windows |
+| Copy archive into isolated Ubuntu guest | **PASS**: guest SHA-256 matched independently |
+| Validate and extract TAR safely | **PASS**: **410 archive entries**, approximately **185 MiB** of file payload |
+| Identify application files | **PASS**: three Compose files; data directories for five services |
+| Import exact production container images | **PASS**: five immutable running-image IDs exported from production, transferred and imported offline; no registry pulls |
+| Preserve source artifacts | **PASS**: application tests used writable **copies** of restored data |
+| Production impact | **No production container shutdown or configuration change during the rehearsal** |
+
+The recovered archive contains configuration and sensitive application state. Raw restore staging requires restrictive local permissions and an intentional cleanup policy even if the Restic repository itself is encrypted.
+
+### Application verification
+
+| Workload | Verified observation | Limit |
+| --- | --- | --- |
+| Home Assistant | **HTTP 200** from restored instance | Application and HTTP startup only; no full device/automation validation |
+| Jellyfin | **HTTP 200**, healthy | **Media library excluded** from backups; empty test media mount |
+| Pi-hole | Healthy; real local **DNS A** query returned **NOERROR** with an answer | No LAN clients, upstream DNS or WAN test |
+| Mosquitto | Temporary authenticated client passed **CONNECT, SUBSCRIBE, PUBLISH and message receipt** | Not proof of the complete HA/Zigbee message flow |
+| Zigbee2MQTT | Configuration/data and exact image recovered | **Radio/runtime not tested**; no dedicated coordinator passed through |
+
+**Mosquitto troubleshooting:** First startup failed with **exit 13** and inability to open its password file. Recovered bind-mount permissions did not permit the service identity to read the file. Adjusting ownership in the **working copy only** resolved startup. An anonymous CONNECT was rejected (expected with broker authentication); a temporary test account then proved authenticated publish/subscribe. The original password file was restored during cleanup.
+
+**Home Assistant integration troubleshooting:** A first attempt to duplicate protected HA authentication storage failed due to filesystem permissions. A privileged copy into a separate test directory succeeded. That test copy's broker target was redirected to loopback. HA joined the isolated broker container's network namespace, maintained **a TCP connection to the MQTT port in two consecutive samples**, and served **HTTP 200**. **This confirms TCP-level connectivity, not successful Home Assistant MQTT authentication or correct entity restoration.** A Docker IPv4-forwarding warning was expected under the isolated network policy.
+
+### Reboot persistence and limits
+
+A graceful guest reboot was performed; the **kernel boot identifier changed**. After boot, all repeated checks passed:
+
+- Stable guest static network address, **no default route** and key-based SSH.
+- Docker service active and enabled.
+- Restored and working-copy application directories intact.
+- Overall systemd state **running**, improving from an earlier **degraded** observation.
+
+**Verified outcome:** recovery of a real encrypted multi-service archive onto an independently installed VM, four restored application startups, broker/DNS functional operations, isolated HA-to-MQTT TCP connectivity, and persistent DR boot configuration.
+
+**Not verified:** a full device/automation migration, HA MQTT authentication or all restored entities, physical Zigbee coordinator, production DNS routing, Jellyfin media restoration, automatically provisioned replacement host, planned production-host outage, actual failover, RTO or RPO measurement, repository pruning or protection against physical site loss. This was a **supervised and isolated recovery rehearsal**, not a failover acceptance test.
+
+### Engineering takeaways / next steps
+
+1. **Test more than checksum integrity.** Recover real service state, import the exact images and probe application protocols.
+2. **Preserve application ownership and modes.** Bind-mounted credentials may be inaccessible to their runtime UID after cross-host extraction.
+3. **Keep the test network separate.** Do not blindly run host-network Compose definitions or start hardware-dependent device integrations on recovery infrastructure.
+4. **Separate evidence layers.** HTTP 200, DNS response, authenticated MQTT delivery and MQTT TCP connectivity are distinct tests; none alone proves complete smart-home recovery.
+5. **Build repeatable DR provisioning.** Future IaC/Ansible work can replace manual Hyper-V, networking, Docker and restoration steps with reviewed, reproducible automation.
+6. **Measure recovery objectives independently.** Plan a controlled full-stack drill to establish RTO/RPO; separately exercise actual retention pruning and interrupted-operation recovery.
+
+**Publication boundary:** No private IP addresses, hostnames, SSH keys, credentials, device identifiers, service-account names, repository locations, snapshot IDs or image digests are included in this public case study.
