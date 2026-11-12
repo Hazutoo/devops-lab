@@ -1,0 +1,8 @@
+---
+- name: Validate DR guest before provisioning
+  hosts: dr
+  gather_facts: false
+  become: false
+
+  roles:
+    - dr_prebootstrap
