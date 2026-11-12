@@ -101,3 +101,5 @@ Stage 2.1: public `main` role and playbook files matched the operator's WSL copi
 ## 12 November 2026: Ansible prebootstrap validation
 
 [Read the Stage 3 sanitized case study](docs/2026-11-12-ansible-stage3-dr-prebootstrap.md) and [Docker-independent guardrail role](iac/ansible/roles/dr_prebootstrap/tasks/main.yml). The operator's read-only WSL implementation passed syntax, two normal runs (`ok=11 changed=0 failed=0` each), and three negative target tests; the role has no direct Docker or recovery-data references. **These are local test results, not yet a hash-verified GitHub checkout or a genuinely fresh-VM validation.** Real inventory settings and credentials are excluded.
+
+Stage 3.1 validation: public `main` Stage 3 role/playbook passed Git blob and local-file parity checks; two ordinary DR-only executions each returned `ok=11 changed=0 failed=0`, plus an early negative SSH-user rejection. See [Stage 3 evidence](docs/2026-11-12-ansible-stage3-dr-prebootstrap.md). No fresh-VM or package-installation test is claimed.
