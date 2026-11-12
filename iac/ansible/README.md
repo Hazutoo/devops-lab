@@ -110,3 +110,12 @@ ansible-playbook -i inventories/local/hosts.yml \
 This example is intentionally nonfunctional without private DR parameters and a reachable, Python-enabled Ubuntu guest. **It does not perform initial operating-system, network or SSH bootstrap.**
 
 **Operator's verified original local source (12 November 2026):** dependency scan, syntax PASS, two normal runs (`ok=11 changed=0 unreachable=0 failed=0` each), wrong-IP, wrong-SSH-user and forced-local-transport rejections before guest fact gathering. The newly committed public version still requires its own source-parity and Git-checkout verification. Blank-host compatibility has **not** yet been tested.
+
+### Stage 3.1 source verification (12 November 2026)
+
+The operator validated the Stage 3 files directly from **public `main`** after the Stage 3 branch had merged. Git blob and byte-for-byte local WSL comparisons passed:
+
+- `roles/dr_prebootstrap/tasks/main.yml`: `bdba997ea7423e43b1adc49d49b2066c9b4faf39`
+- `playbooks/20-dr-prebootstrap.yml`: `620983b981419ab443c986538853f64490964013`
+
+The verified public code then passed syntax validation, two normal DR-only runs (`ok=11 changed=0 unreachable=0 failed=0` each), and another early wrong-SSH-user rejection. This confirms repeatability on the **existing** isolated guest. Blank-host provisioning and mutation-role idempotency are not yet demonstrated.
