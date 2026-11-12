@@ -44,3 +44,23 @@ The verified change covers **guest root storage only**. It does not prove Docker
 The next step is a read-only availability/dependency audit, followed by a pinned Docker `noble/amd64` offline bundle with integrity checks and a gated Ansible installation plan. The isolated guest should not be given internet access for convenience.
 
 No real inventory values, private hostnames, private addresses, usernames, backup names or private SSH keys are included here.
+
+
+## Stage 5.3 — preflight for offline package preparation (verified)
+
+Operator output confirmed that the WSL-based download controller runs Ubuntu 26.04 `amd64`, with `curl`, `gpg`, `gpgv`, `sha256sum`, `dpkg-deb` and Python available. HTTPS HEAD tests succeeded against Docker's official Ubuntu 24.04 `noble` Release endpoint and Ubuntu's official Noble InRelease endpoint.
+
+Read-only checks against the separately isolated Ubuntu 24.04 `amd64` guest confirmed the expected hostname and architecture, locally installed base package dependencies (including `iptables`, `libseccomp2`, `libsystemd0`, `libdevmapper`, `libc6`, `apparmor` and CA certificates), approximately 18 GB available root space, and **no default IPv4/IPv6 route**.
+
+```text
+DOCKER_NOBLE_SOURCE_REACHABLE
+UBUNTU_NOBLE_SOURCE_REACHABLE
+GUEST_IDENTITY_PASS
+NO_DEFAULT_ROUTES_PASS
+GUEST PACKAGE AUDIT PASS
+STAGE 5.3 COMPLETE
+```
+
+**Not yet proven:** package acquisition, GPG/repository signature verification, dependency closure, version pinning, archived bundle SHA-256 verification, offline Docker installation or recovery.
+
+**Operator workflow change:** Future steps should use [a single, comprehensive script per bounded stage](OPERATOR_SCRIPT_STANDARD.md) rather than a succession of small snippets. Retain explicit confirmation for substantial write operations and fail-closed target checks.
