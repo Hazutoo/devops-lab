@@ -101,3 +101,8 @@ Stage 2.1: public `main` role and playbook files matched the operator's WSL copi
 ## 12 November 2026: Ansible prebootstrap validation
 
 [Read the Stage 3 sanitized case study](docs/2026-11-12-ansible-stage3-dr-prebootstrap.md) and [Docker-independent guardrail role](iac/ansible/roles/dr_prebootstrap/tasks/main.yml). The operator's read-only WSL implementation passed syntax, two normal runs (`ok=11 changed=0 failed=0` each), and three negative target tests; the role has no direct Docker or recovery-data references. **These are local test results, not yet a hash-verified GitHub checkout or a genuinely fresh-VM validation.** Real inventory settings and credentials are excluded.
+
+
+## 12 November 2026: offline DR readiness and root LVM expansion
+
+[Read the sanitized Stage 5 LVM case study](docs/2026-11-12-dr-stage5-lvm-offline-readiness.md). On a fresh Docker-free Ubuntu 24.04 recovery guest, the operator verified LVM headroom and approved online extension of root ext4 by 10 GiB. The LV grew from 14.47 to 24.47 GiB with 4.47 GiB retained as spare VG capacity; final result PASS. Offline Docker bundle collection, dependency validation and recovery are not yet done.
