@@ -1,6 +1,6 @@
 # Read-only DR preflight with Ansible Core
 
-This directory contains a **sanitized, parameterized reference** derived from a successful, independently operated, isolated disaster-recovery preflight on 12 November 2026. It is **not** a claim that these generalized public files were run exactly as committed.
+This directory contains a **sanitized, parameterized reference** derived from a successful, independently operated, isolated disaster-recovery preflight on 12 November 2026. The public playbook was subsequently validated on the isolated guest with private runtime variables; the example inventory still contains placeholders and has not been executed as provided.
 
 ## Goal
 
@@ -25,7 +25,7 @@ iac/ansible/
   playbooks/00-preflight.yml
 ```
 
-## Usage (not yet tested against the public example)
+## Usage with a private inventory
 
 1. Install a supported Ansible Core version in a controller-only Python virtual environment.
 2. Verify the SSH host key over an independently trusted channel, use an explicit dedicated SSH client key, and test `ansible.builtin.ping` first.
@@ -48,6 +48,12 @@ ansible.builtin.ping: SUCCESS, changed=false
 PLAY RECAP: ok=14 changed=0 unreachable=0 failed=0
 ```
 
-The generalized public version was adapted afterward; it has **not** received a separately recorded syntax or end-to-end execution test. A second normal-mode execution/idempotence comparison, fully automated fresh-host provisioning, Hyper-V switch readback under adequate permissions, complete application failover and measured RTO/RPO remain outstanding.
+A subsequent operator run **did validate this public parameterized playbook** (feature-branch commit `4aa6d8dff554b987d4319508c76872074502406a`). The checkout was verified by Git SHA; syntax checking passed and `--check` on the isolated guest with private external vars reported:
+
+```text
+PLAY RECAP: ok=12 changed=0 unreachable=0 failed=0
+```
+
+The example inventory itself is placeholder-only and **was not the inventory used in this run**. The verbose `stat` loop results exposed private target paths **in the operator's local log**, not in Git. Avoid publishing raw operator logs and improve loop output in a subsequent reviewed change. A second normal-mode execution/idempotence comparison, fresh-host provisioning, Hyper-V switch readback under adequate permissions, complete application failover and measured RTO/RPO remain outstanding.
 
 Do not merge these status categories: verified **preflight** is not verified **provisioning** or **failover**.
