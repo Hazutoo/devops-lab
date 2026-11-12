@@ -80,3 +80,14 @@ The external vars file must define `dr_expected_hostname`, `dr_expected_ipv4_cid
 **Operator-verified original version:** syntax PASS, positive `--check` run `ok=13 changed=0 unreachable=0 failed=0`, wrong-hostname rejection before remote fact gathering, and forced-local-connection rejection before remote fact gathering. The first attempt failed due to the delegated connection context and was corrected by reading the original target via `hostvars[inventory_hostname]`.
 
 **Not yet independently verified:** direct source parity of the newly committed Stage 2 role/playbook and execution from this branch; repeat normal-mode Stage 2 runs, automated fresh-VM configuration and future write-capable roles. This guardrail assumes Docker is already active and is therefore **not** a pre-Docker bootstrap check.
+
+### Stage 2.1 validation update (12 November 2026)
+
+The operator subsequently validated the **committed Stage 2 files on public `main`**, rather than the deleted feature branch. Git blob hashes matched expected values and the checked-out files matched existing WSL files byte-for-byte:
+
+- `roles/dr_guardrails/tasks/main.yml`: `df73289441f9bd02598cfe37dcb80ae62b0047cd`
+- `playbooks/10-dr-guardrails.yml`: `e690f9659c2649dd1dcfad28778a405ead565f40`
+
+Syntax check passed. Two normal-mode DR-only runs each returned `ok=13 changed=0 unreachable=0 failed=0`. A separate negative test with an incorrect expected target address failed before remote fact gathering. The earlier wrong-hostname and forced-local-transport tests also passed. This establishes **read-only guardrail repeatability**, not idempotence of future mutation roles.
+
+No real host details, secrets or operator logs were added to this repository. The role still assumes installed, active Docker and existing recovery directories; separate `pre_bootstrap` checks will be required for a fresh blank VM.
