@@ -88,3 +88,8 @@ A read-only host audit on 5 November 2026 confirmed spare memory capacity, unall
 ## 12 November 2026: Ansible DR preflight (read-only)
 
 [Read the sanitized Stage 1 case study](docs/2026-11-12-ansible-dr-read-only-preflight.md) and [generalized Ansible reference](iac/ansible/README.md). The operator's private original read-only playbook passed a 14-task check-mode run with zero changes; the public parameterized adaptation passed a 12-task `--check` run and two separate normal-mode runs (`ok=12 changed=0` each), using external private inventory and variables. Repeatability was shown for this read-only preflight, not configuration-changing provisioning roles. The placeholder example inventory remains untested as provided. An independent elevated Windows Hyper-V readback also confirmed an Internal-only VM switch attachment and Standard baseline checkpoint; no packet-level leak test was performed. No real inventory or private infrastructure identifiers are published.
+
+
+## 12 November 2026: reusable Ansible DR guardrails
+
+[Read the sanitized fail-closed guardrail case study](docs/2026-11-12-ansible-dr-guardrails-fail-closed.md) and [role/playbook reference](iac/ansible/README.md). The operator's corrected read-only playbook passed one positive check-mode run (`ok=13 changed=0 failed=0`) and two negative early-rejection tests (incorrect guest identity and local transport). Committed Stage 2 code has not yet been rechecked from its GitHub branch; automated fresh-VM provisioning is still pending.

@@ -57,3 +57,26 @@ PLAY RECAP: ok=12 changed=0 unreachable=0 failed=0
 The example inventory itself is placeholder-only and **was not the inventory used in this run**. The verbose `stat` loop results exposed private target paths **in the operator's local log**, not in Git. Avoid publishing raw operator logs and improve loop output in a subsequent reviewed change. A **subsequent** Stage 1.1 exercise pinned the public playbook Git blob and ran it twice in ordinary mode (not check mode). Both runs passed: `ok=12 changed=0 unreachable=0 failed=0`, with `RUN_1_PASS`, `RUN_2_PASS` and `NORMAL-MODE REPEATABILITY PASS`. This verifies repeatability of the **read-only** preflight, not the idempotence of future configuration-changing roles. Fresh-host provisioning, elevated Windows Hyper-V switch readback has since **passed** (Internal switch, one DR NIC, Standard checkpoint). Full application failover, measured RTO/RPO and deliberate packet-level isolation testing remain outstanding.
 
 Do not merge these status categories: verified **preflight** is not verified **provisioning** or **failover**.
+
+
+## Stage 2: DR-only reusable guardrail role
+
+Stage 2 adds `roles/dr_guardrails/tasks/main.yml` and `playbooks/10-dr-guardrails.yml` while preserving the known-good Stage 1 preflight. The role evaluates guest identity, network routes, active SSH/Docker services and recovery directory existence. The entry playbook refuses unexpected inventory targets using locally delegated `pre_tasks`; host-specific transport/address values come from `hostvars[inventory_hostname]`.
+
+Because the playbook is stored in `playbooks/` but the role lives in a sibling `roles/` folder, configure its search path when invoking Ansible:
+
+```bash
+export ANSIBLE_ROLES_PATH="$PWD/roles"
+ansible-playbook -i inventories/local/hosts.yml \
+  playbooks/10-dr-guardrails.yml -e @/path/to/private-dr-vars.yml \
+  --limit dr --syntax-check
+ansible-playbook -i inventories/local/hosts.yml \
+  playbooks/10-dr-guardrails.yml -e @/path/to/private-dr-vars.yml \
+  --limit dr --check
+```
+
+The external vars file must define `dr_expected_hostname`, `dr_expected_ipv4_cidr`, `dr_network_interface` and `dr_required_directories`. The example inventory is deliberately nonfunctional and no actual private values are stored here.
+
+**Operator-verified original version:** syntax PASS, positive `--check` run `ok=13 changed=0 unreachable=0 failed=0`, wrong-hostname rejection before remote fact gathering, and forced-local-connection rejection before remote fact gathering. The first attempt failed due to the delegated connection context and was corrected by reading the original target via `hostvars[inventory_hostname]`.
+
+**Not yet independently verified:** direct source parity of the newly committed Stage 2 role/playbook and execution from this branch; repeat normal-mode Stage 2 runs, automated fresh-VM configuration and future write-capable roles. This guardrail assumes Docker is already active and is therefore **not** a pre-Docker bootstrap check.

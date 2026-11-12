@@ -1,0 +1,88 @@
+---
+- name: Gather DR guest facts
+  ansible.builtin.setup:
+
+- name: Verify operating system and guest identity
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution'] == 'Ubuntu'
+      - ansible_facts['distribution_version'] == '24.04'
+      - ansible_facts['hostname'] == dr_expected_hostname
+
+- name: Inspect IPv4 interface
+  ansible.builtin.command:
+    argv:
+      - ip
+      - -o
+      - -4
+      - addr
+      - show
+      - dev
+      - "{{ dr_network_interface }}"
+  register: dr_ipv4
+  changed_when: false
+  check_mode: false
+
+- name: Inspect IPv4 default route
+  ansible.builtin.command:
+    argv: [ip, -4, route, show, default]
+  register: dr_route4
+  changed_when: false
+  check_mode: false
+
+- name: Inspect IPv6 default route
+  ansible.builtin.command:
+    argv: [ip, -6, route, show, default]
+  register: dr_route6
+  changed_when: false
+  check_mode: false
+
+- name: Verify offline network guardrails
+  ansible.builtin.assert:
+    that:
+      - dr_expected_ipv4_cidr in dr_ipv4.stdout
+      - dr_route4.stdout | trim == ''
+      - dr_route6.stdout | trim == ''
+    fail_msg: "DR network guardrail failed"
+
+- name: Inspect required services
+  ansible.builtin.command:
+    argv: [systemctl, is-active, "{{ item }}"]
+  loop:
+    - ssh
+    - docker
+  register: dr_services
+  changed_when: false
+  check_mode: false
+
+- name: Verify required services
+  ansible.builtin.assert:
+    that:
+      - >-
+        (dr_services.results |
+        selectattr('stdout', 'equalto', 'active') |
+        list | length) == 2
+
+- name: Inspect recovery directories
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop: "{{ dr_required_directories }}"
+  loop_control:
+    index_var: path_index
+    label: "recovery-directory-{{ path_index + 1 }}"
+  register: dr_paths
+  no_log: true
+
+- name: Verify recovery directories
+  ansible.builtin.assert:
+    that:
+      - >-
+        (dr_paths.results |
+        selectattr('stat.isdir', 'defined') |
+        selectattr('stat.isdir', 'equalto', true) |
+        list | length) ==
+        (dr_required_directories | length)
+
+- name: Confirm DR guardrails
+  ansible.builtin.debug:
+    msg: "DR_GUARDRAILS_PASS"
