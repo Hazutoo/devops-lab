@@ -54,6 +54,6 @@ A subsequent operator run **did validate this public parameterized playbook** (f
 PLAY RECAP: ok=12 changed=0 unreachable=0 failed=0
 ```
 
-The example inventory itself is placeholder-only and **was not the inventory used in this run**. The verbose `stat` loop results exposed private target paths **in the operator's local log**, not in Git. Avoid publishing raw operator logs and improve loop output in a subsequent reviewed change. A second normal-mode execution/idempotence comparison, fresh-host provisioning, Hyper-V switch readback under adequate permissions, complete application failover and measured RTO/RPO remain outstanding.
+The example inventory itself is placeholder-only and **was not the inventory used in this run**. The verbose `stat` loop results exposed private target paths **in the operator's local log**, not in Git. Avoid publishing raw operator logs and improve loop output in a subsequent reviewed change. A **subsequent** Stage 1.1 exercise pinned the public playbook Git blob and ran it twice in ordinary mode (not check mode). Both runs passed: `ok=12 changed=0 unreachable=0 failed=0`, with `RUN_1_PASS`, `RUN_2_PASS` and `NORMAL-MODE REPEATABILITY PASS`. This verifies repeatability of the **read-only** preflight, not the idempotence of future configuration-changing roles. Fresh-host provisioning, Hyper-V switch readback under adequate permissions, complete application failover and measured RTO/RPO remain outstanding.
 
 Do not merge these status categories: verified **preflight** is not verified **provisioning** or **failover**.
