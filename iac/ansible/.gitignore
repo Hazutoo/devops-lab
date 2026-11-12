@@ -1,0 +1,7 @@
+# Real/private inventories, credentials and local Ansible artifacts
+inventories/local/
+inventories/dr.yml
+*.retry
+.vault_password*
+.ansible/
+__pycache__/

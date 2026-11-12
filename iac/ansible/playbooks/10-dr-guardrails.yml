@@ -1,0 +1,30 @@
+---
+- name: Validate DR through reusable guardrails
+  hosts: dr
+  gather_facts: false
+  become: false
+
+  pre_tasks:
+    - name: Require explicit DR parameters
+      ansible.builtin.assert:
+        that:
+          - dr_expected_hostname is defined
+          - dr_expected_ipv4_cidr is defined
+          - dr_network_interface is defined
+          - dr_required_directories is defined
+          - dr_required_directories | length > 0
+        fail_msg: "Missing DR guardrail parameters"
+      delegate_to: localhost
+
+    - name: Verify intended inventory target
+      ansible.builtin.assert:
+        that:
+          - groups.get('dr', []) | length == 1
+          - inventory_hostname == dr_expected_hostname
+          - hostvars[inventory_hostname].get('ansible_host', '') == dr_expected_ipv4_cidr.split('/')[0]
+          - hostvars[inventory_hostname].get('ansible_connection', 'ssh') == 'ssh'
+        fail_msg: "DR target mismatch"
+      delegate_to: localhost
+
+  roles:
+    - dr_guardrails
