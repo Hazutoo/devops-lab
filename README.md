@@ -1,5 +1,7 @@
 # DevOps Lab
 
+**Operator script standard (2026-11-12):** [One complete, self-contained PowerShell 7 script per logical stage](docs/OPERATOR_SCRIPT_STANDARD.md), including preflight, bounded execution, verification and an explicit final result. Avoid numerous small snippets; require separate approval for risky changes. [Stage 5.3 offline preflight](docs/2026-11-12-dr-stage5-lvm-offline-readiness.md) passed source reachability and guest read-only dependency/route checks; Docker offline bundle creation is still pending.
+
 ## Operator-controlled terminal workflow
 
 The [PowerShell SSH clipboard workflow](docs/2026-11-06-powershell-ssh-clipboard-workflow.md) describes how a human operator can run remote Linux commands through a local PowerShell helper and paste the captured results into an ordinary chat. It includes a sanitized example, interactive sudo support, multiline here-string guidance, and privacy boundaries. It does **not** give an assistant autonomous terminal access.
@@ -102,4 +104,11 @@ Stage 2.1: public `main` role and playbook files matched the operator's WSL copi
 
 [Read the Stage 3 sanitized case study](docs/2026-11-12-ansible-stage3-dr-prebootstrap.md) and [Docker-independent guardrail role](iac/ansible/roles/dr_prebootstrap/tasks/main.yml). The operator's read-only WSL implementation passed syntax, two normal runs (`ok=11 changed=0 failed=0` each), and three negative target tests; the role has no direct Docker or recovery-data references. **These are local test results, not yet a hash-verified GitHub checkout or a genuinely fresh-VM validation.** Real inventory settings and credentials are excluded.
 
-Stage 3.1 validation: public `main` Stage 3 role/playbook passed Git blob and local-file parity checks; two ordinary DR-only executions each returned `ok=11 changed=0 failed=0`, plus an early negative SSH-user rejection. See [Stage 3 evidence](docs/2026-11-12-ansible-stage3-dr-prebootstrap.md). No fresh-VM or package-installation test is claimed.
+
+## 12 November 2026: offline DR readiness and root LVM expansion
+
+[Read the sanitized Stage 5 LVM case study](docs/2026-11-12-dr-stage5-lvm-offline-readiness.md). On a fresh Docker-free Ubuntu 24.04 recovery guest, the operator verified LVM headroom and approved online extension of root ext4 by 10 GiB. The LV grew from 14.47 to 24.47 GiB with 4.47 GiB retained as spare VG capacity; final result PASS. Offline Docker bundle collection, dependency validation and recovery are not yet done.
+
+## 12 November 2026: Stage 3.1: validated prebootstrap source and regression checks
+
+[Stage 3.1: validated prebootstrap source and regression checks](docs/2026-11-12-ansible-stage3-dr-prebootstrap.md). Public role/playbook Git blobs matched the tested revision; two normal runs and a wrong-target negative case passed on the existing isolated recovery guest. These are historical Stage 3.1 results, preceding the later fresh-guest validation.
