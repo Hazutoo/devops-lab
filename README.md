@@ -93,3 +93,6 @@ A read-only host audit on 5 November 2026 confirmed spare memory capacity, unall
 ## 12 November 2026: reusable Ansible DR guardrails
 
 [Read the sanitized fail-closed guardrail case study](docs/2026-11-12-ansible-dr-guardrails-fail-closed.md) and [role/playbook reference](iac/ansible/README.md). The operator's corrected read-only playbook passed one positive check-mode run (`ok=13 changed=0 failed=0`) and two negative early-rejection tests (incorrect guest identity and local transport). Committed Stage 2 code has not yet been rechecked from its GitHub branch; automated fresh-VM provisioning is still pending.
+
+
+Stage 2.1: public `main` role and playbook files matched the operator's WSL copies. Two normal DR-only runs each passed (`ok=13 changed=0 failed=0`) and the additional wrong-address negative test rejected the target before guest facts. See [Stage 2 validation](docs/2026-11-12-ansible-dr-guardrails-fail-closed.md). This remains read-only validation, not fresh-host provisioning.
