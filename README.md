@@ -84,3 +84,7 @@ A read-only host audit on 5 November 2026 confirmed spare memory capacity, unall
 ## 10 November 2026: isolated disaster-recovery rehearsal
 
 - [Cross-platform Restic clean-VM recovery (case study, section L)](backup/encrypted-restic-sftpgo-windows-backup-and-restore.md#l-10-november-2026-isolated-clean-vm-disaster-recovery-rehearsal) — recovered the real encrypted five-service archive onto an independently installed, offline-isolated Ubuntu VM, checked archive integrity on both machines, imported exact production images and validated restored application startup. Local DNS resolution and authenticated MQTT publish/subscribe passed; HA-to-broker TCP connectivity and guest reboot persistence were confirmed. **Not demonstrated:** Zigbee radio, full HA MQTT/automation behavior, media-library restoration, production failover, measured RTO/RPO or actual prune. This public case study omits all private infrastructure identifiers.
+
+## 12 November 2026: Ansible DR preflight (read-only)
+
+[Read the sanitized Stage 1 case study](docs/2026-11-12-ansible-dr-read-only-preflight.md) and [generalized Ansible reference](iac/ansible/README.md). The operator's private original read-only playbook passed a 14-task check-mode run with zero changes; the public parameterized adaptation is **not independently validated yet**. No real inventory or private infrastructure identifiers are published.
