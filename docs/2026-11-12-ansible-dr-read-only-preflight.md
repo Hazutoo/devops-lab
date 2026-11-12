@@ -26,7 +26,7 @@ The previous DR exercise proved limited recovery and service tests but did not p
 4. Validated the local Ansible controller with `ansible.builtin.ping`.
 5. Established guest SSH authentication using a dedicated ED25519 key and host-key pinning; an existing guest SSH key authorization file was backed up before adding the new public key.
 6. Executed a DR-only read-only Ansible playbook checking guest identity, expected address, absent default routes, SSH/Docker service activity and restored-data directory existence.
-7. Published a **parameterized reference playbook** under [`iac/ansible`](../iac/ansible/README.md). Unlike the original locally executed version, the public adaptation requires its own validation.
+7. Published a **parameterized reference playbook** under [`iac/ansible`](../iac/ansible/README.md). The public adaptation was subsequently validated by the operator against a separate private inventory and temporary parameter file.
 
 ## Validation
 
@@ -40,7 +40,16 @@ DR preflight: ok=14 changed=0 unreachable=0 failed=0
 
 The private original playbook's 14 tasks were run with `--check`. There was no host provisioning, service restart or production configuration change during this Ansible preflight.
 
-**Not demonstrated:** idempotency through repeated normal-mode runs, deployment from the new public parameterized playbook, guest container inspection without privilege escalation, elevated Hyper-V switch verification, offline Docker installation automation, end-to-end service restoration, genuine failover, or RTO/RPO measurement.
+**Additional verified result, 12 November 2026:** the operator checked out the feature branch at commit `4aa6d8dff554b987d4319508c76872074502406a` (`COMMIT_VERIFIED`) and tested **the public parameterized playbook** with a private DR-only inventory and temporary non-committed variables. Syntax check passed, and an isolated guest `--check` run reported:
+
+```text
+PLAY RECAP
+DR guest: ok=12 changed=0 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0
+```
+
+The public sample inventory contains placeholders and was not directly executed. The detailed Ansible output included verbose registered `stat` loop items; future changes should suppress full metadata in public-facing logs.
+
+**Not demonstrated:** idempotency through repeated normal-mode runs, privileged guest container inventory, elevated Hyper-V switch verification, offline Docker installation automation, end-to-end service restoration, genuine failover, or RTO/RPO measurement.
 
 ## Lessons Learned
 
@@ -52,4 +61,4 @@ The private original playbook's 14 tasks were run with `--check`. There was no h
 
 ## Next Steps
 
-Validate the generalized playbook locally, move network and identity checks into a dedicated DR guardrail role, define checksum-pinned offline package artifacts, and use PowerShell for guarded VM creation. Keep production changes and unmodified production Compose execution outside this scope.
+Keep the validated public preflight as a known baseline, reduce verbose loop output, move network and identity checks into a dedicated DR guardrail role, define checksum-pinned offline package artifacts, and use PowerShell for guarded VM creation. Keep production changes and unmodified production Compose execution outside this scope.
