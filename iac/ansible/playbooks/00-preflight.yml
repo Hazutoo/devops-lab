@@ -1,0 +1,96 @@
+---
+- name: Validate isolated disaster recovery guest (read-only)
+  hosts: dr
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Require explicit target guardrail values
+      ansible.builtin.assert:
+        that:
+          - dr_expected_hostname is defined
+          - dr_expected_ipv4_cidr is defined
+          - dr_network_interface is defined
+          - dr_required_directories is defined
+          - dr_required_directories | length > 0
+          - dr_expected_hostname != 'REPLACE_WITH_GUEST_HOSTNAME'
+          - dr_expected_ipv4_cidr != 'REPLACE_WITH_GUEST_CIDR'
+        fail_msg: "Set explicit DR-only parameters before executing"
+
+    - name: Assert guest operating system and expected hostname
+      ansible.builtin.assert:
+        that:
+          - ansible_facts['distribution'] == 'Ubuntu'
+          - ansible_facts['distribution_version'] == '24.04'
+          - ansible_facts['hostname'] == dr_expected_hostname
+        fail_msg: "Wrong guest identity: stop before any provisioning"
+
+    - name: Inspect expected IPv4 interface
+      ansible.builtin.command:
+        argv:
+          - ip
+          - -o
+          - -4
+          - addr
+          - show
+          - dev
+          - "{{ dr_network_interface }}"
+      register: dr_ipv4
+      changed_when: false
+      check_mode: false
+
+    - name: Inspect IPv4 default routes
+      ansible.builtin.command:
+        argv: [ip, -4, route, show, default]
+      register: dr_default4
+      changed_when: false
+      check_mode: false
+
+    - name: Inspect IPv6 default routes
+      ansible.builtin.command:
+        argv: [ip, -6, route, show, default]
+      register: dr_default6
+      changed_when: false
+      check_mode: false
+
+    - name: Assert offline network policy
+      ansible.builtin.assert:
+        that:
+          - dr_expected_ipv4_cidr in dr_ipv4.stdout
+          - dr_default4.stdout | trim == ''
+          - dr_default6.stdout | trim == ''
+        fail_msg: "Unexpected DR network state; do not continue"
+
+    - name: Check required system services
+      ansible.builtin.command:
+        argv: [systemctl, is-active, "{{ item }}"]
+      loop:
+        - ssh
+        - docker
+      register: dr_services
+      changed_when: false
+      check_mode: false
+
+    - name: Assert services are active
+      ansible.builtin.assert:
+        that:
+          - item.stdout | trim == 'active'
+        fail_msg: "Expected service is not active"
+      loop: "{{ dr_services.results }}"
+
+    - name: Inspect expected recovery directories
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop: "{{ dr_required_directories }}"
+      register: dr_paths
+
+    - name: Assert recovery directories are present
+      ansible.builtin.assert:
+        that:
+          - item.stat.isdir | default(false)
+        fail_msg: "An expected recovery directory is absent"
+      loop: "{{ dr_paths.results }}"
+
+    - name: Report read-only validation
+      ansible.builtin.debug:
+        msg: "DR guest assertions passed; no changes applied"
