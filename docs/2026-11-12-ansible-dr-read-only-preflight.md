@@ -77,3 +77,12 @@ NORMAL-MODE REPEATABILITY PASS
 ## Next Steps
 
 Keep the validated public preflight as a known baseline, reduce verbose loop output, move network and identity checks into a dedicated DR guardrail role, define checksum-pinned offline package artifacts, and use PowerShell for guarded VM creation. Keep production changes and unmodified production Compose execution outside this scope.
+
+
+## Follow-up: independent Hyper-V configuration audit (12 November 2026)
+
+An **elevated, read-only** Windows PowerShell inspection succeeded after an earlier non-elevated/insufficiently checked query had not returned usable VM properties.
+
+**Verified:** Hyper-V management service running; one matching Generation 2 DR VM running with four vCPUs; exactly one VM network adapter connected to the intended **Internal** virtual switch; one Standard-type baseline checkpoint present. The audit reported `HYPERV_DR_AUDIT: PASS`.
+
+This is independent host-side configuration evidence, beyond the Linux guest's no-default-route assertions. It is **not** a packet-level isolation/leak test, independent VM backup or proof of full recovery. No VM, network, switch or checkpoint settings were changed.
