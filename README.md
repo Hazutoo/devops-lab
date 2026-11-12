@@ -1,5 +1,7 @@
 # DevOps Lab
 
+**Operator script standard (2026-11-12):** [One complete, self-contained PowerShell 7 script per logical stage](docs/OPERATOR_SCRIPT_STANDARD.md), including preflight, bounded execution, verification and an explicit final result. Avoid numerous small snippets; require separate approval for risky changes. [Stage 5.3 offline preflight](docs/2026-11-12-dr-stage5-lvm-offline-readiness.md) passed source reachability and guest read-only dependency/route checks; Docker offline bundle creation is still pending.
+
 ## Operator-controlled terminal workflow
 
 The [PowerShell SSH clipboard workflow](docs/2026-11-06-powershell-ssh-clipboard-workflow.md) describes how a human operator can run remote Linux commands through a local PowerShell helper and paste the captured results into an ordinary chat. It includes a sanitized example, interactive sudo support, multiline here-string guidance, and privacy boundaries. It does **not** give an assistant autonomous terminal access.
