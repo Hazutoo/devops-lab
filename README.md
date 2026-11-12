@@ -96,3 +96,8 @@ A read-only host audit on 5 November 2026 confirmed spare memory capacity, unall
 
 
 Stage 2.1: public `main` role and playbook files matched the operator's WSL copies. Two normal DR-only runs each passed (`ok=13 changed=0 failed=0`) and the additional wrong-address negative test rejected the target before guest facts. See [Stage 2 validation](docs/2026-11-12-ansible-dr-guardrails-fail-closed.md). This remains read-only validation, not fresh-host provisioning.
+
+
+## 12 November 2026: Ansible prebootstrap validation
+
+[Read the Stage 3 sanitized case study](docs/2026-11-12-ansible-stage3-dr-prebootstrap.md) and [Docker-independent guardrail role](iac/ansible/roles/dr_prebootstrap/tasks/main.yml). The operator's read-only WSL implementation passed syntax, two normal runs (`ok=11 changed=0 failed=0` each), and three negative target tests; the role has no direct Docker or recovery-data references. **These are local test results, not yet a hash-verified GitHub checkout or a genuinely fresh-VM validation.** Real inventory settings and credentials are excluded.
