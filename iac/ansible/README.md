@@ -91,3 +91,22 @@ The operator subsequently validated the **committed Stage 2 files on public `mai
 Syntax check passed. Two normal-mode DR-only runs each returned `ok=13 changed=0 unreachable=0 failed=0`. A separate negative test with an incorrect expected target address failed before remote fact gathering. The earlier wrong-hostname and forced-local-transport tests also passed. This establishes **read-only guardrail repeatability**, not idempotence of future mutation roles.
 
 No real host details, secrets or operator logs were added to this repository. The role still assumes installed, active Docker and existing recovery directories; separate `pre_bootstrap` checks will be required for a fresh blank VM.
+
+
+## Stage 3: pre-Docker recovery guest validation
+
+The `dr_prebootstrap` role and `playbooks/20-dr-prebootstrap.yml` check guest identity, SSH inventory target/user, offline IPv4/IPv6 routing and running SSH **without requiring Docker or recovery directories**.
+
+To invoke this read-only role, configure `ANSIBLE_ROLES_PATH` (roles are siblings of `playbooks/`) and supply a **private** DR-only inventory and an external vars file containing `dr_expected_hostname`, `dr_expected_ipv4_cidr`, `dr_expected_ssh_user` and `dr_network_interface`:
+
+```bash
+export ANSIBLE_ROLES_PATH="$PWD/roles"
+ansible-playbook -i inventories/local/hosts.yml \
+  playbooks/20-dr-prebootstrap.yml \
+  -e @/path/to/private-prebootstrap-vars.yml \
+  --limit dr --check
+```
+
+This example is intentionally nonfunctional without private DR parameters and a reachable, Python-enabled Ubuntu guest. **It does not perform initial operating-system, network or SSH bootstrap.**
+
+**Operator's verified original local source (12 November 2026):** dependency scan, syntax PASS, two normal runs (`ok=11 changed=0 unreachable=0 failed=0` each), wrong-IP, wrong-SSH-user and forced-local-transport rejections before guest fact gathering. The newly committed public version still requires its own source-parity and Git-checkout verification. Blank-host compatibility has **not** yet been tested.
