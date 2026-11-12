@@ -49,14 +49,29 @@ DR guest: ok=12 changed=0 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0
 
 The public sample inventory contains placeholders and was not directly executed. The detailed Ansible output included verbose registered `stat` loop items; future changes should suppress full metadata in public-facing logs.
 
-**Not demonstrated:** idempotency through repeated normal-mode runs, privileged guest container inventory, elevated Hyper-V switch verification, offline Docker installation automation, end-to-end service restoration, genuine failover, or RTO/RPO measurement.
+**Not demonstrated:** idempotency of any future change-applying provisioning roles, privileged guest container inventory, elevated Hyper-V switch verification, offline Docker installation automation, end-to-end service restoration, genuine failover, or RTO/RPO measurement.
+
+## Follow-up: Stage 1.1 normal-mode repeatability (12 November 2026)
+
+After validating the public parameterized playbook in check mode, the operator pinned its Git blob hash and ran that **unchanged read-only playbook twice in normal mode** with an external private inventory and temporary variables.
+
+```text
+PLAYBOOK_HASH_PASS
+NORMAL RUN 1: ok=12 changed=0 unreachable=0 failed=0
+RUN_1_PASS
+NORMAL RUN 2: ok=12 changed=0 unreachable=0 failed=0
+RUN_2_PASS
+NORMAL-MODE REPEATABILITY PASS
+```
+
+**Verified:** both sequential ordinary runs succeeded without reported changes or unreachable hosts. This provides repeatability evidence for this preflight, not an idempotency demonstration of provisioning or mutation roles. No private host identifiers, network addresses, snapshot names, recovery paths or raw metadata logs are published.
 
 ## Lessons Learned
 
 - WSL2 can be a suitable test controller while the Windows host retains responsibility for Hyper-V creation; a confirmed TCP socket does not prove SSH authentication.
 - A separate virtual environment limits interference with the system Python installation.
 - Offline DR assumptions should be encoded as **fail-closed assertions**, not treated as prose-only safeguards.
-- `changed=0` in one check-mode run is evidence of a non-changing preflight, not a complete idempotence test.
+- `changed=0` in a check-mode run is evidence of a non-changing preflight, not a complete idempotence test. Two subsequent normal-mode runs confirmed repeatability **only of the read-only preflight**, not of future provisioning tasks.
 - Public portfolio code can demonstrate the method without publishing identifiable private infrastructure details.
 
 ## Next Steps
