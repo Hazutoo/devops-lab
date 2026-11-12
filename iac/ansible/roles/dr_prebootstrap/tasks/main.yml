@@ -1,0 +1,93 @@
+---
+- name: Require DR bootstrap parameters
+  ansible.builtin.assert:
+    that:
+      - dr_expected_hostname is defined
+      - dr_expected_ipv4_cidr is defined
+      - dr_expected_ssh_user is defined
+      - dr_network_interface is defined
+    fail_msg: "DR_PREBOOTSTRAP_PARAMETERS_MISSING"
+  delegate_to: localhost
+  become: false
+
+- name: Reject unintended inventory target
+  ansible.builtin.assert:
+    that:
+      - groups.get('dr', []) | length == 1
+      - inventory_hostname == dr_expected_hostname
+      - >-
+        hostvars[inventory_hostname].get('ansible_host', '') ==
+        dr_expected_ipv4_cidr.split('/')[0]
+      - >-
+        hostvars[inventory_hostname].get('ansible_connection', 'ssh') ==
+        'ssh'
+      - >-
+        hostvars[inventory_hostname].get('ansible_user', '') ==
+        dr_expected_ssh_user
+    fail_msg: "DR_PREBOOTSTRAP_TARGET_MISMATCH"
+  delegate_to: localhost
+  become: false
+
+- name: Gather DR prebootstrap guest facts
+  ansible.builtin.setup:
+  become: false
+
+- name: Verify Ubuntu version and hostname
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution'] == 'Ubuntu'
+      - ansible_facts['distribution_version'] == '24.04'
+      - ansible_facts['hostname'] == dr_expected_hostname
+    fail_msg: "DR_PREBOOTSTRAP_OS_MISMATCH"
+
+- name: Inspect guest IPv4 interface
+  ansible.builtin.command:
+    argv:
+      - ip
+      - -o
+      - -4
+      - addr
+      - show
+      - dev
+      - "{{ dr_network_interface }}"
+  register: preboot_ipv4
+  changed_when: false
+  check_mode: false
+
+- name: Inspect IPv4 default route
+  ansible.builtin.command:
+    argv: [ip, -4, route, show, default]
+  register: preboot_route4
+  changed_when: false
+  check_mode: false
+
+- name: Inspect IPv6 default route
+  ansible.builtin.command:
+    argv: [ip, -6, route, show, default]
+  register: preboot_route6
+  changed_when: false
+  check_mode: false
+
+- name: Verify offline networking
+  ansible.builtin.assert:
+    that:
+      - dr_expected_ipv4_cidr in preboot_ipv4.stdout
+      - preboot_route4.stdout | trim == ''
+      - preboot_route6.stdout | trim == ''
+    fail_msg: "DR_PREBOOTSTRAP_NETWORK_MISMATCH"
+
+- name: Inspect SSH service
+  ansible.builtin.command:
+    argv: [systemctl, is-active, ssh]
+  register: preboot_ssh
+  changed_when: false
+  check_mode: false
+
+- name: Verify SSH is active
+  ansible.builtin.assert:
+    that:
+      - preboot_ssh.stdout | trim == 'active'
+
+- name: Confirm DR prebootstrap
+  ansible.builtin.debug:
+    msg: "DR_PREBOOTSTRAP_PASS"
