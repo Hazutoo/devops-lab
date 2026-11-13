@@ -108,3 +108,7 @@ Stage 2.1: public `main` role and playbook files matched the operator's WSL copi
 ## 12 November 2026: offline DR readiness and root LVM expansion
 
 [Read the sanitized Stage 5 LVM case study](docs/2026-11-12-dr-stage5-lvm-offline-readiness.md). On a fresh Docker-free Ubuntu 24.04 recovery guest, the operator verified LVM headroom and approved online extension of root ext4 by 10 GiB. The LV grew from 14.47 to 24.47 GiB with 4.47 GiB retained as spare VG capacity; final result PASS. Offline Docker bundle collection, dependency validation and recovery are not yet done.
+
+## 12 November 2026: Stage 4.5: fresh Ubuntu prebootstrap without Docker
+
+[Stage 4.5: fresh Ubuntu prebootstrap without Docker](docs/2026-11-12-fresh-ubuntu-dr-prebootstrap.md). A separate fresh Ubuntu 24.04 guest without Docker completed check mode and two normal prebootstrap runs (each 11 OK, 0 changes, 0 failures), plus fail-closed wrong-target validation. This is not unattended OS, Docker or end-to-end recovery provisioning.
