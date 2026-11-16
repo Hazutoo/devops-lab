@@ -87,3 +87,23 @@ A later clean-up used an explicit two-step approval process: read-only discovery
 The removed files totaled **23.766 GiB nominally**; actual net recovered free space was not separately measured. Protected recovery VMs, the Packer base image, the accepted recovery instance and the evidence logs passed post-deletion preservation checks. No production services, Restic repository data or complete application backup were deleted.
 
 **Evidence boundary:** All results describe the observed, operator-run lab session, not unattended routine cleanup or guaranteed future recovery behavior.
+
+
+## Follow-up: inventory, dependency review, and guarded artifact cleanup
+
+A subsequent **operator-run, read-only storage audit** inventoried 378 files (~86.50 GiB of logical file sizes). Its original result was `PARTIAL` because six live Hyper-V configuration/state files were locked, and three large installation images exceeded the initial hashing limit. A separate postflight explained the expected locks, corrected 12 overly broad Hyper-V file classifications, and SHA-256-checked four installer images; **no pair was identical**. Neither the initial audit nor the postflight authorized deletion.
+
+A bounded dependency audit checked five registered VMs and one checkpoint, hashed all 25 Docker installer packages, identified five groups of byte-identical packages and detected eight source-code reference indicators. It completed with zero reported issues, but neither an unattached ISO nor an absent text match proves that a file is reproducible or unused.
+
+The operator then used an explicit audit/execute separation for **exactly 21 files**: one modified unattended installer ISO and 20 duplicate offline Docker package files. The script revalidated pinned evidence, package hashes, the retained package set and live VM media attachments before deletion. After an interactive confirmation, the observed final output was:
+
+```text
+CHECKPOINT=EXACT_21_FILES_REMOVED_RETAINED_SET_PRESERVED
+FINAL_STATUS=EXECUTION_COMPLETE
+DELETED_FILES=21
+VM_STATE_CHANGES=NONE
+```
+
+The deleted files totaled **4.142 GiB of logical file size**, not independently measured reclaimed disk capacity. A full verified offline Docker package set and all protected VM disks, checkpoint dependencies, backup material and recovery evidence were outside the deletion target list. The removed modified ISO was **not independently proven reproducible**, so the outcome should not be presented as a fully risk-free cleanup. No repeat full recovery or production failover was performed.
+
+**Evidence status remains unchanged:** the original integrated recovery orchestrator failed at reporting; independent functional evidence supports `CONDITIONAL_ACCEPTANCE_POSTFLIGHT`. Cleanup success does not upgrade disaster-recovery acceptance. Private paths, GUIDs, addresses, snapshot IDs and credentials remain excluded from this public record.
