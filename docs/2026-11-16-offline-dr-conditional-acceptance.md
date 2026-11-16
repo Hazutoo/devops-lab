@@ -65,8 +65,25 @@ The recovery imported five exact image archives and restored an application-data
 - Authenticated Home Assistant/Jellyfin API flows
 - Full convergence of all external infrastructure-as-code roles
 - Controlled production outage, real failover, and measured real data loss
-- A later full recovery run using the proposed report-validation source fix
+- A later full recovery run using the prepared, statically verified report-validation source fix
 
 **Status:** The application-level recovery objectives were conditionally accepted based on a verified independent postflight. The original execution result remained FAIL due solely to the final reporting type-conversion error. This distinction is essential for accurate operational evidence.
 
 No infrastructure addresses, identifiers, hostnames, credentials, keys or private evidence paths are included in this public case study.
+
+
+## Follow-up: bounded source patch and safe lab cleanup
+
+The reporting-only failure was addressed in a separate **source patch**. Operator output confirmed its parsing and source validation passed, with `PATCHED_NOT_EXECUTED` and no new VM. This should not be confused with an end-to-end run of the patched version.
+
+A later clean-up used an explicit two-step approval process: read-only discovery and disk dependency checks, followed by a guarded audit and a separately confirmed destructive action. It verified identifiers, checkpoint absence, disk parents/children, exclusive virtual-switch use, and preserved recovery evidence before deletion. The operator-observed final result was **PASS**:
+
+| Cleanup scope | Confirmed removed |
+| --- | ---: |
+| Superseded test virtual machines (gracefully shut down first) | 2 |
+| Explicitly targeted virtual disk files | 4 |
+| Exclusive unused internal virtual switches | 2 |
+
+The removed files totaled **23.766 GiB nominally**; actual net recovered free space was not separately measured. Protected recovery VMs, the Packer base image, the accepted recovery instance and the evidence logs passed post-deletion preservation checks. No production services, Restic repository data or complete application backup were deleted.
+
+**Evidence boundary:** All results describe the observed, operator-run lab session, not unattended routine cleanup or guaranteed future recovery behavior.
