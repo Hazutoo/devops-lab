@@ -42,3 +42,9 @@ The operator ran the read-only PowerShell 7/WSL dependency scanner and supplied 
 ## Next implementation input — prepared, not executed
 
 A single operator-side read-only source-interface capture script is prepared in the private Draft PR. It will collect the existing playbook/role implementations for source-level analysis, record file hashes, and generate a review-only package with heuristic redaction and an explicit operator review requirement. It does not connect to a guest, run Ansible or modify any backup. The source capsule is **not yet executed or assessed**; it is the evidence needed before implementing a cross-target adapter. No new functional DR acceptance is claimed.
+
+## Source capsule execution evidence
+
+The operator ran the standalone Stage 9.3 PowerShell 7/WSL source capture. It enumerated **seven playbooks, six roles and fourteen selected source files** and created a locally retained source-review archive and manifest. Redaction output reported 4 address substitutions and 30 long-token substitutions, with no sensitive-identifier lines removed; these metrics **do not establish that the archive is safe for disclosure**. The operator must review it before sharing.
+
+**Verified from operator-supplied console output:** source capture completed, no guest/VM or backup writes, and restore gate remained blocked. **Not yet verified:** actual package contents, role/helper dependency closure, new Docker image import, integrated restore and fresh RTO/RPO. Previous recovery acceptance remains conditional and unchanged.
