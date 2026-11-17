@@ -38,3 +38,7 @@ The execution must not create a new VM, alter production, change protected DR gu
 The operator ran the read-only PowerShell 7/WSL dependency scanner and supplied its console result. All seven Ansible playbooks passed syntax checking, and the six expected roles were found. The offline Docker playbook uses play-level privilege escalation; application and isolated-runtime roles contain additional task-level privilege escalation. The offline Docker role references a guest-side Python helper.
 
 **Acceptance:** `PASS_STATIC_SOURCE_ONLY`; restore gate deliberately blocked; no VM changes, no Restic write, no RTO/RPO measurement. These static results do not establish operational compatibility or validate the latest combined Docker image import. A new bounded source-code interface extraction remains necessary before cross-target orchestration. The private evidence stays on the operator's backup host.
+
+## Next implementation input — prepared, not executed
+
+A single operator-side read-only source-interface capture script is prepared in the private Draft PR. It will collect the existing playbook/role implementations for source-level analysis, record file hashes, and generate a review-only package with heuristic redaction and an explicit operator review requirement. It does not connect to a guest, run Ansible or modify any backup. The source capsule is **not yet executed or assessed**; it is the evidence needed before implementing a cross-target adapter. No new functional DR acceptance is claimed.
