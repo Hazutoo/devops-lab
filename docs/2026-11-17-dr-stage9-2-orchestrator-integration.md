@@ -32,3 +32,9 @@ The execution must not create a new VM, alter production, change protected DR gu
 ## Session checkpoint
 
 **VERIFIED:** state of previous PRs and earlier repo-backed prebootstrap/guardrail assumptions. **PENDING:** live WSL dependency graph and execution evidence. **UNTOUCHED:** all protected infrastructure and repository backup state. Documentation remains in Draft PR until separately reviewed; no merge authorized.
+
+## Stage 9.2 execution evidence (operator-observed)
+
+The operator ran the read-only PowerShell 7/WSL dependency scanner and supplied its console result. All seven Ansible playbooks passed syntax checking, and the six expected roles were found. The offline Docker playbook uses play-level privilege escalation; application and isolated-runtime roles contain additional task-level privilege escalation. The offline Docker role references a guest-side Python helper.
+
+**Acceptance:** `PASS_STATIC_SOURCE_ONLY`; restore gate deliberately blocked; no VM changes, no Restic write, no RTO/RPO measurement. These static results do not establish operational compatibility or validate the latest combined Docker image import. A new bounded source-code interface extraction remains necessary before cross-target orchestration. The private evidence stays on the operator's backup host.
